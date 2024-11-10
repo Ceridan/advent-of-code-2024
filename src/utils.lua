@@ -26,8 +26,8 @@ end
 local function read_lines_as_number_array(path)
     local lines = read_lines_as_string_array(path)
     local arr = {}
-    for i = 1, #lines do
-        table.insert(arr, tonumber(lines[i]))
+    for _, line in ipairs(lines) do
+        table.insert(arr, tonumber(line))
     end
     return arr
 end
