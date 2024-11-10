@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+export LUA_VERSION="5.1"
+export LUA_PATH="./lua_modules/share/lua/$LUA_VERSION/?.lua;./lua_modules/share/lua/$LUA_VERSION/?/init.lua;$LUA_PATH;./src/?.lua"
+export LUA_CPATH="./lua_modules/lib/lua/$LUA_VERSION/?.so;$LUA_CPATH"
+export PATH="./lua_modules/bin:$PATH"
+export AOC_SESSION=""
