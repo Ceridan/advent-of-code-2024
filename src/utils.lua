@@ -29,8 +29,7 @@ local function read_lines_as_string_array(path)
 end
 
 local function read_lines_as_number_array(path)
-    local fn = function(line) return tonumber(line) end
-    return read_lines_as_array(path, fn)
+    return read_lines_as_array(path, tonumber)
 end
 
 return {
