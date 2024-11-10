@@ -13,23 +13,24 @@ local function read_file(path)
     return content
 end
 
-local function read_lines_as_string_array(path)
+local function read_lines_as_array(path, transform_fn)
     local content = read_file(path)
 
     local arr = {}
     for line in content:gmatch("[^\n]+") do
-        table.insert(arr, line)
+        table.insert(arr, transform_fn(line))
     end
     return arr
 end
 
+local function read_lines_as_string_array(path)
+    local fn = function(line) return line end
+    return read_lines_as_array(path, fn)
+end
+
 local function read_lines_as_number_array(path)
-    local lines = read_lines_as_string_array(path)
-    local arr = {}
-    for _, line in ipairs(lines) do
-        table.insert(arr, tonumber(line))
-    end
-    return arr
+    local fn = function(line) return tonumber(line) end
+    return read_lines_as_array(path, fn)
 end
 
 return {
