@@ -40,8 +40,11 @@ local function main()
     print(string.format("Day ${DAY}, part 2: %s", part2(input)))
 end
 
+-- LuaFormatter off
 test(part1({}), 0)
+
 test(part2({}), 0)
+-- LuaFormatter on
 
 main()
 

@@ -1,9 +1,9 @@
-local function string_split(str, pattern)
-    local arr = {}
+local function regex(str, pattern)
+    local matches = {}
     for line in str:gmatch(pattern) do
-        table.insert(arr, line)
+        table.insert(matches, line)
     end
-    return arr
+    return matches
 end
 
-return {string_split = string_split}
+return {regex = regex}

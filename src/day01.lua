@@ -6,7 +6,7 @@ local function parse_input(input)
     local list1 = {}
     local list2 = {}
     for _, row in ipairs(input) do
-        local nums = str.string_split(row, "%S+")
+        local nums = str.regex(row, "%S+")
         table.insert(list1, tonumber(nums[1]))
         table.insert(list2, tonumber(nums[2]))
     end
