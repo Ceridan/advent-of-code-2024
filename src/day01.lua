@@ -48,8 +48,25 @@ local function main()
     print(string.format("Day 01, part 2: %s", part2(input)))
 end
 
-test(part1({"3   4", "4   3", "2   5", "1   3", "3   9", "3   3"}), 11)
-test(part2({"3   4", "4   3", "2   5", "1   3", "3   9", "3   3"}), 31)
+-- LuaFormatter off
+test(part1({
+    "3   4",
+    "4   3",
+    "2   5",
+    "1   3",
+    "3   9",
+    "3   3",
+}), 11)
+
+test(part2({
+    "3   4",
+    "4   3",
+    "2   5",
+    "1   3",
+    "3   9",
+    "3   3",
+}), 31)
+-- LuaFormatter on
 
 main()
 
