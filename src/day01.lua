@@ -1,11 +1,12 @@
-local utils = require("utils")
-local inspect = require("inspect")
+local io = require("lib.io")
+local str = require("lib.str")
+local test = require("lib.test")
 
 local function parse_input(input)
     local list1 = {}
     local list2 = {}
     for _, row in ipairs(input) do
-        local nums = utils.string_split(row, "%S+")
+        local nums = str.string_split(row, "%S+")
         table.insert(list1, tonumber(nums[1]))
         table.insert(list2, tonumber(nums[2]))
     end
@@ -41,28 +42,14 @@ local function part2(data)
 end
 
 local function main()
-    local input = utils.read_lines_as_string_array("src/inputs/day01.txt")
+    local input = io.read_lines_as_string_array("src/inputs/day01.txt")
 
     print(string.format("Day 01, part 1: %s", part1(input)))
     print(string.format("Day 01, part 2: %s", part2(input)))
 end
 
-utils.test(part1({
-    "3   4",
-    "4   3",
-    "2   5",
-    "1   3",
-    "3   9",
-    "3   3",
-}), 11)
-utils.test(part2({
-    "3   4",
-    "4   3",
-    "2   5",
-    "1   3",
-    "3   9",
-    "3   3",
-}), 31)
+test(part1({"3   4", "4   3", "2   5", "1   3", "3   9", "3   3"}), 11)
+test(part2({"3   4", "4   3", "2   5", "1   3", "3   9", "3   3"}), 31)
 
 main()
 

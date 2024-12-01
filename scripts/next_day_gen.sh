@@ -22,7 +22,8 @@ if [ -f "$code_filename" ]; then
 fi
 
 cat <<EOF > "$code_filename"
-local utils = require("utils")
+local io = require("lib.io")
+local test = require("lib.test")
 
 local function part1(data)
     return 0
@@ -33,14 +34,14 @@ local function part2(data)
 end
 
 local function main()
-    local input = utils.read_lines_as_number_array("src/inputs/day${DAY}.txt")
+    local input = io.read_lines_as_number_array("src/inputs/day${DAY}.txt")
 
     print(string.format("Day ${DAY}, part 1: %s", part1(input)))
     print(string.format("Day ${DAY}, part 2: %s", part2(input)))
 end
 
-utils.test(part1({}), 0)
-utils.test(part2({}), 0)
+test(part1({}), 0)
+test(part2({}), 0)
 
 main()
 
