@@ -1,3 +1,23 @@
+local function file_exists(path)
+    local file = io.open(path, "r")
+    if file ~= nil then
+        file:close()
+        return true
+    else
+        return false
+    end
+end
+
+local function write_file(path, content)
+    local file = io.open(path, "w")
+    if not file then
+        print(string.format("Can't create file on path: %s", path))
+        os.exit(1)
+    end
+    file:write(content)
+    file:close()
+end
+
 local function read_file(path)
     local file = io.open(path, "r")
     if not file then
@@ -29,7 +49,7 @@ local function read_columns_as_array(content, delimeter, transform_fn)
 
     local lines = read_lines_as_array(content)
     local cols = {}
-    local pattern = "[^" .. delimeter .. "]+"
+    local pattern = string.format("[^%s]+", delimeter)
     for i, line in ipairs(lines) do
         local j = 1
         for col in line:gmatch(pattern) do
@@ -41,4 +61,10 @@ local function read_columns_as_array(content, delimeter, transform_fn)
     return cols
 end
 
-return {read_file = read_file, read_lines_as_array = read_lines_as_array, read_columns_as_array = read_columns_as_array}
+return {
+    file_exists = file_exists,
+    write_file = write_file,
+    read_file = read_file,
+    read_lines_as_array = read_lines_as_array,
+    read_columns_as_array = read_columns_as_array
+}

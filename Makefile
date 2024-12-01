@@ -30,4 +30,4 @@ exec: # Run day XX
 
 .PHONY: gen
 gen: # Generate next day
-	@scripts/next_day_gen.sh $(day)
+	@lua src/gen.lua $(day)

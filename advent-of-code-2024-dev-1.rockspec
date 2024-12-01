@@ -13,5 +13,6 @@ dependencies = {
    "lua == 5.1",
    "luaformatter == scm-1",
    "luacheck >= 1.2",
-   "inspect >= 3.1"
+   "inspect >= 3.1",
+   "http" >= 0.4"
 }
