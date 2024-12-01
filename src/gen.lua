@@ -28,10 +28,10 @@ local function part2(data)
 end
 
 local function main()
-    local input = io.read_file("src/inputs/day${DAY}.txt")
+    local input = io.read_file("src/inputs/day{{DAY}}.txt")
 
-    print(string.format("Day ${DAY}, part 1: %s", part1(input)))
-    print(string.format("Day ${DAY}, part 2: %s", part2(input)))
+    print(string.format("Day {{DAY}}, part 1: %s", part1(input)))
+    print(string.format("Day {{DAY}}, part 2: %s", part2(input)))
 end
 
 -- LuaFormatter off
@@ -42,6 +42,7 @@ test(part2({}), 0)
 
 main()
 ]]
+code_content = code_content:gsub("{{DAY}}", day)
 
 -- Download input
 local input_filename = string.format("src/day%d.lua", day)
