@@ -3,8 +3,7 @@ local test = require("lib.test")
 
 local function parse_input(input)
     local cols = io.read_columns_as_array(input, " ", tonumber)
-    local list1, list2 = unpack(cols)
-    return list1, list2
+    return cols[1], cols[2]
 end
 
 local function part1(data)
