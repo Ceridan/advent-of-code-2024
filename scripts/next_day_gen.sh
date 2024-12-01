@@ -25,6 +25,10 @@ cat <<EOF > "$code_filename"
 local io = require("lib.io")
 local test = require("lib.test")
 
+local function parse_input(input)
+    return input
+end
+
 local function part1(data)
     return 0
 end
@@ -34,7 +38,7 @@ local function part2(data)
 end
 
 local function main()
-    local input = io.read_lines_as_number_array("src/inputs/day${DAY}.txt")
+    local input = io.read_file("src/inputs/day${DAY}.txt")
 
     print(string.format("Day ${DAY}, part 1: %s", part1(input)))
     print(string.format("Day ${DAY}, part 2: %s", part2(input)))

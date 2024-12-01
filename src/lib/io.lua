@@ -9,28 +9,36 @@ local function read_file(path)
     return content
 end
 
-local function read_lines_as_array(path, transform_fn)
-    local content = read_file(path)
-
-    local arr = {}
-    for line in content:gmatch("[^\n]+") do
-        table.insert(arr, transform_fn(line))
-    end
-    return arr
-end
-
-local function read_lines_as_string_array(path)
-    local fn = function(line)
+local function read_lines_as_array(content, transform_fn)
+    transform_fn = transform_fn or function(line)
         return line
     end
-    return read_lines_as_array(path, fn)
+
+    local lines = {}
+    for line in content:gmatch("[^\n]+") do
+        table.insert(lines, transform_fn(line))
+    end
+    return lines
 end
 
-local function read_lines_as_number_array(path)
-    return read_lines_as_array(path, tonumber)
+local function read_columns_as_array(content, delimeter, transform_fn)
+    delimeter = delimeter or " "
+    transform_fn = transform_fn or function(line)
+        return line
+    end
+
+    local lines = read_lines_as_array(content)
+    local cols = {}
+    local pattern = "[^" .. delimeter .. "]+"
+    for i, line in ipairs(lines) do
+        local j = 1
+        for col in line:gmatch(pattern) do
+            cols[j] = cols[j] or {}
+            cols[j][i] = transform_fn(col)
+            j = j + 1
+        end
+    end
+    return cols
 end
 
-return {
-    read_lines_as_string_array = read_lines_as_string_array,
-    read_lines_as_number_array = read_lines_as_number_array
-}
+return {read_file = read_file, read_lines_as_array = read_lines_as_array, read_columns_as_array = read_columns_as_array}

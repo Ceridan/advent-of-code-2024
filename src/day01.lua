@@ -1,15 +1,9 @@
 local io = require("lib.io")
-local str = require("lib.str")
 local test = require("lib.test")
 
 local function parse_input(input)
-    local list1 = {}
-    local list2 = {}
-    for _, row in ipairs(input) do
-        local nums = str.regex(row, "%S+")
-        table.insert(list1, tonumber(nums[1]))
-        table.insert(list2, tonumber(nums[2]))
-    end
+    local cols = io.read_columns_as_array(input, " ", tonumber)
+    local list1, list2 = unpack(cols)
     return list1, list2
 end
 
@@ -18,12 +12,12 @@ local function part1(data)
     table.sort(list1)
     table.sort(list2)
 
-    local delta_sum = 0
+    local total_distance = 0
     for i = 1, #list1 do
-        delta_sum = delta_sum + math.abs(list1[i] - list2[i])
+        total_distance = total_distance + math.abs(list1[i] - list2[i])
     end
 
-    return delta_sum
+    return total_distance
 end
 
 local function part2(data)
@@ -33,39 +27,39 @@ local function part2(data)
         freq[num] = (freq[num] or 0) + 1
     end
 
-    local freq_sum = 0
+    local similarity_score = 0
     for _, num in ipairs(list1) do
-        freq_sum = freq_sum + (freq[num] or 0) * num
+        similarity_score = similarity_score + (freq[num] or 0) * num
     end
 
-    return freq_sum
+    return similarity_score
 end
 
 local function main()
-    local input = io.read_lines_as_string_array("src/inputs/day01.txt")
+    local input = io.read_file("src/inputs/day01.txt")
 
     print(string.format("Day 01, part 1: %s", part1(input)))
     print(string.format("Day 01, part 2: %s", part2(input)))
 end
 
 -- LuaFormatter off
-test(part1({
-    "3   4",
-    "4   3",
-    "2   5",
-    "1   3",
-    "3   9",
-    "3   3",
-}), 11)
+test(part1([[
+3   4
+4   3
+2   5
+1   3
+3   9
+3   3
+]]), 11)
 
-test(part2({
-    "3   4",
-    "4   3",
-    "2   5",
-    "1   3",
-    "3   9",
-    "3   3",
-}), 31)
+test(part2([[
+3   4
+4   3
+2   5
+1   3
+3   9
+3   3
+]]), 31)
 -- LuaFormatter on
 
 main()
