@@ -22,7 +22,7 @@ if [ -f "$code_filename" ]; then
 fi
 
 cat <<EOF > "$code_filename"
-local utils = require "utils"
+local utils = require("utils")
 
 local function part1(data)
     return 0
