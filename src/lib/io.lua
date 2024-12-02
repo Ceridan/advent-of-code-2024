@@ -61,10 +61,31 @@ local function read_columns_as_array(content, delimeter, transform_fn)
     return cols
 end
 
+local function read_matrix(content, delimeter, transform_fn)
+    delimeter = delimeter or " "
+    transform_fn = transform_fn or function(line)
+        return line
+    end
+
+    local lines = read_lines_as_array(content)
+    local matrix = {}
+    local pattern = string.format("[^%s]+", delimeter)
+    for i, line in ipairs(lines) do
+        local j = 1
+        for cell in line:gmatch(pattern) do
+            matrix[i] = matrix[i] or {}
+            matrix[i][j] = transform_fn(cell)
+            j = j + 1
+        end
+    end
+    return matrix
+end
+
 return {
     file_exists = file_exists,
     write_file = write_file,
     read_file = read_file,
     read_lines_as_array = read_lines_as_array,
-    read_columns_as_array = read_columns_as_array
+    read_columns_as_array = read_columns_as_array,
+    read_matrix = read_matrix,
 }

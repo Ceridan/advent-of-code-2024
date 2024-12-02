@@ -45,7 +45,7 @@ main()
 code_content = code_content:gsub("{{DAY}}", day)
 
 -- Download input
-local input_filename = string.format("src/day%d.lua", day)
+local input_filename = string.format("src/inputs/day%s.txt", day)
 if io.file_exists(input_filename) then
     print(string.format("File already exists on path: %s", input_filename))
     os.exit(1)
