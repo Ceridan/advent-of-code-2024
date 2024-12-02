@@ -2,7 +2,7 @@ local io = require("lib.io")
 local test = require("lib.test")
 
 local function parse_input(input)
-    local cols = io.read_columns_as_array(input, " ", tonumber)
+    local cols = io.read_matrix_T(input, " ", tonumber)
     return cols[1], cols[2]
 end
 

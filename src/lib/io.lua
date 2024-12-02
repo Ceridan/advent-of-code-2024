@@ -41,24 +41,18 @@ local function read_lines_as_array(content, transform_fn)
     return lines
 end
 
-local function read_columns_as_array(content, delimeter, transform_fn)
-    delimeter = delimeter or " "
-    transform_fn = transform_fn or function(line)
-        return line
-    end
-
+local function read_matrix_impl(content, delimeter, matrix_builder_fn)
     local lines = read_lines_as_array(content)
-    local cols = {}
+    local matrix = {}
     local pattern = string.format("[^%s]+", delimeter)
     for i, line in ipairs(lines) do
         local j = 1
-        for col in line:gmatch(pattern) do
-            cols[j] = cols[j] or {}
-            cols[j][i] = transform_fn(col)
+        for cell in line:gmatch(pattern) do
+            matrix_builder_fn(matrix, cell, i, j)
             j = j + 1
         end
     end
-    return cols
+    return matrix
 end
 
 local function read_matrix(content, delimeter, transform_fn)
@@ -66,19 +60,23 @@ local function read_matrix(content, delimeter, transform_fn)
     transform_fn = transform_fn or function(line)
         return line
     end
-
-    local lines = read_lines_as_array(content)
-    local matrix = {}
-    local pattern = string.format("[^%s]+", delimeter)
-    for i, line in ipairs(lines) do
-        local j = 1
-        for cell in line:gmatch(pattern) do
-            matrix[i] = matrix[i] or {}
-            matrix[i][j] = transform_fn(cell)
-            j = j + 1
-        end
+    local builder_fn = function(matrix, cell, i, j)
+        matrix[i] = matrix[i] or {}
+        matrix[i][j] = transform_fn(cell)
     end
-    return matrix
+    return read_matrix_impl(content, delimeter, builder_fn)
+end
+
+local function read_matrix_T(content, delimeter, transform_fn)
+    delimeter = delimeter or " "
+    transform_fn = transform_fn or function(line)
+        return line
+    end
+    local builder_fn = function(matrix, cell, i, j)
+        matrix[j] = matrix[j] or {}
+        matrix[j][i] = transform_fn(cell)
+    end
+    return read_matrix_impl(content, delimeter, builder_fn)
 end
 
 return {
@@ -86,6 +84,6 @@ return {
     write_file = write_file,
     read_file = read_file,
     read_lines_as_array = read_lines_as_array,
-    read_columns_as_array = read_columns_as_array,
-    read_matrix = read_matrix
+    read_matrix = read_matrix,
+    read_matrix_T = read_matrix_T
 }
