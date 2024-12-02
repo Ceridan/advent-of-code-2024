@@ -87,5 +87,5 @@ return {
     read_file = read_file,
     read_lines_as_array = read_lines_as_array,
     read_columns_as_array = read_columns_as_array,
-    read_matrix = read_matrix,
+    read_matrix = read_matrix
 }
