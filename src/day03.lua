@@ -1,14 +1,21 @@
 local io = require("lib.io")
 local test = require("lib.test")
-local regex = require("regex")
+
+local function multiply(mul)
+    local left = tonumber(mul:match("(%d+),"))
+    local right = tonumber(mul:match(",(%d+)"))
+    return left * right
+end
 
 local function part1(data)
-    local muls = regex.matches(data, "mul\\((\\d+),(\\d+)\\)", "gm")
+    local muls = {}
+    for mul in data:gfind("mul%(%d+,%d+%)") do
+        table.insert(muls, mul)
+    end
 
     local sum = 0
     for _, mul in ipairs(muls) do
-        local matches = regex.match(mul, "(\\d+),(\\d+)", "gm")
-        sum = sum + tonumber(matches[2]) * tonumber(matches[3])
+        sum = sum + multiply(mul)
     end
 
     return sum
@@ -16,20 +23,30 @@ end
 
 local function part2(data)
     local instr = {}
-    local dos = regex.indexesof(data, "do\\(\\)", "gm")
-    for i = 1, #dos, 2 do
-        instr[dos[i]] = {type="mode", value=1}
+    local idx = 0
+    while true do
+        idx, _ = data:find("do%(%)", idx+1)
+        if not idx then
+            break
+        end
+        instr[idx] = {type="mode", value=1}
     end
-    local donts = regex.indexesof(data, "don't\\(\\)", "gm")
-    for i = 1, #donts, 2 do
-        instr[donts[i]] = {type="mode", value=0}
+    idx = 0
+    while true do
+        idx, _ = data:find("don't%(%)", idx+1)
+        if not idx then
+            break
+        end
+        instr[idx] = {type="mode", value=0}
     end
-
-    local muls = regex.matches(data, "mul\\((\\d+),(\\d+)\\)", "gm")
-    local idxs = regex.indexesof(data, "mul\\((\\d+),(\\d+)\\)", "gm")
-    for i, mul in ipairs(muls) do
-        local matches = regex.match(mul, "(\\d+),(\\d+)", "gm")
-        instr[idxs[i*2-1]] = {type="data", value=tonumber(matches[2]) * tonumber(matches[3])}
+    idx = 0
+    while true do
+        idx, _ = data:find("mul%(%d+,%d+%)", idx+1)
+        if not idx then
+            break
+        end
+        local mul = data:match("mul%(%d+,%d+%)", idx)
+        instr[idx] = {type="data", value=multiply(mul)}
     end
 
     local keys = {}
