@@ -19,9 +19,9 @@ end
 
 local function process_report(report)
     local base_sign = calc_sign(report[1], report[2])
-    for j = 1, #report-1 do
-        local sign = calc_sign(report[j], report[j+1])
-        local diff = math.abs(report[j] - report[j+1])
+    for j = 1, #report - 1 do
+        local sign = calc_sign(report[j], report[j + 1])
+        local diff = math.abs(report[j] - report[j + 1])
         if sign == 0 or sign ~= base_sign or diff < 1 or diff > 3 then
             return {safe = false, err = j}
         end

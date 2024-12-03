@@ -7,6 +7,17 @@ local function multiply(mul)
     return left * right
 end
 
+local function extract(data, instructions, pattern, result_fn)
+    local idx = 0
+    while true do
+        idx = data:find(pattern, idx + 1)
+        if not idx then
+            break
+        end
+        instructions[idx] = result_fn(idx)
+    end
+end
+
 local function part1(data)
     local muls = {}
     for mul in data:gfind("mul%(%d+,%d+%)") do
@@ -23,31 +34,16 @@ end
 
 local function part2(data)
     local instr = {}
-    local idx = 0
-    while true do
-        idx, _ = data:find("do%(%)", idx+1)
-        if not idx then
-            break
-        end
-        instr[idx] = {type="mode", value=1}
-    end
-    idx = 0
-    while true do
-        idx, _ = data:find("don't%(%)", idx+1)
-        if not idx then
-            break
-        end
-        instr[idx] = {type="mode", value=0}
-    end
-    idx = 0
-    while true do
-        idx, _ = data:find("mul%(%d+,%d+%)", idx+1)
-        if not idx then
-            break
-        end
+    extract(data, instr, "do%(%)", function()
+        return {type = "mode", value = 1}
+    end)
+    extract(data, instr, "don't%(%)", function()
+        return {type = "mode", value = 0}
+    end)
+    extract(data, instr, "mul%(%d+,%d+%)", function(idx)
         local mul = data:match("mul%(%d+,%d+%)", idx)
-        instr[idx] = {type="data", value=multiply(mul)}
-    end
+        return {type = "data", value = multiply(mul)}
+    end)
 
     local keys = {}
     for k, _ in pairs(instr) do
@@ -58,12 +54,10 @@ local function part2(data)
     local sum = 0
     local mode = 1
     for _, k in ipairs(keys) do
-        if instr[k] ~= nil then
-            if instr[k].type == "mode" then
-                mode = instr[k].value
-            else
-                sum = sum + mode * instr[k].value
-            end
+        if instr[k].type == "mode" then
+            mode = instr[k].value
+        else
+            sum = sum + mode * instr[k].value
         end
     end
     return sum

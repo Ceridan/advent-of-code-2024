@@ -56,7 +56,7 @@ local req_headers = {
     [":method"] = "GET",
     [":authority"] = "adventofcode.com",
     [":path"] = string.format("/2024/day/%d/input", tonumber(day)),
-    ["cookie"] = string.format("session=%s", os.getenv("AOC_SESSION")),
+    ["cookie"] = string.format("session=%s", os.getenv("AOC_SESSION"))
 }
 local req = http_request.new_from_uri(url)
 for key, value in pairs(req_headers) do
@@ -66,7 +66,7 @@ end
 local headers, stream = assert(req:go())
 local body = assert(stream:get_body_as_string())
 if headers:get(":status") ~= "200" then
-    print("HTTP response code:",headers:get(":status"))
+    print("HTTP response code:", headers:get(":status"))
     error(body)
 end
 
