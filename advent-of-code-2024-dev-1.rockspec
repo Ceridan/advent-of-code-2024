@@ -15,5 +15,5 @@ dependencies = {
    "luacheck >= 1.2",
    "inspect >= 3.1",
    "http >= 0.4",
-   "regex" >= 0.2"
+   "regex >= 0.2"
 }

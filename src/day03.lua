@@ -1,6 +1,5 @@
 local io = require("lib.io")
 local test = require("lib.test")
-local inspect = require("inspect")
 local regex = require("regex")
 
 local function part1(data)
@@ -16,7 +15,41 @@ local function part1(data)
 end
 
 local function part2(data)
-    return 0
+    local instr = {}
+    local dos = regex.indexesof(data, "do\\(\\)", "gm")
+    for i = 1, #dos, 2 do
+        instr[dos[i]] = {type="mode", value=1}
+    end
+    local donts = regex.indexesof(data, "don't\\(\\)", "gm")
+    for i = 1, #donts, 2 do
+        instr[donts[i]] = {type="mode", value=0}
+    end
+
+    local muls = regex.matches(data, "mul\\((\\d+),(\\d+)\\)", "gm")
+    local idxs = regex.indexesof(data, "mul\\((\\d+),(\\d+)\\)", "gm")
+    for i, mul in ipairs(muls) do
+        local matches = regex.match(mul, "(\\d+),(\\d+)", "gm")
+        instr[idxs[i*2-1]] = {type="data", value=tonumber(matches[2]) * tonumber(matches[3])}
+    end
+
+    local keys = {}
+    for k, _ in pairs(instr) do
+        table.insert(keys, k)
+    end
+    table.sort(keys)
+
+    local sum = 0
+    local mode = 1
+    for _, k in ipairs(keys) do
+        if instr[k] ~= nil then
+            if instr[k].type == "mode" then
+                mode = instr[k].value
+            else
+                sum = sum + mode * instr[k].value
+            end
+        end
+    end
+    return sum
 end
 
 local function main()
