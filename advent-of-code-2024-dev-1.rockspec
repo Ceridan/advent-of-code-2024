@@ -14,5 +14,6 @@ dependencies = {
    "luaformatter == scm-1",
    "luacheck >= 1.2",
    "inspect >= 3.1",
-   "http" >= 0.4"
+   "http >= 0.4",
+   "regex" >= 0.2"
 }
