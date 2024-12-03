@@ -20,7 +20,6 @@ function Point2D:__tostring()
     return string.format("Point2D(%.2f, %.2f)", self.x, self.y)
 end
 
--- Optional method to calculate distance
 function Point2D:distance(other)
     return math.sqrt((self.x - other.x) ^ 2 + (self.y - other.y) ^ 2)
 end
