@@ -78,11 +78,24 @@ local function read_matrix_T(content, delimeter, transform_fn)
     return read_matrix_impl(content, delimeter, builder_fn)
 end
 
+local function read_text_matrix(content)
+    local lines = read_lines_as_array(content)
+    local matr = {}
+    for i, line in ipairs(lines) do
+        matr[i] = {}
+        for ch in line:gfind(".") do
+            table.insert(matr[i], ch)
+        end
+    end
+    return matr
+end
+
 return {
     file_exists = file_exists,
     write_file = write_file,
     read_file = read_file,
     read_lines_as_array = read_lines_as_array,
     read_matrix = read_matrix,
-    read_matrix_T = read_matrix_T
+    read_matrix_T = read_matrix_T,
+    read_text_matrix = read_text_matrix
 }

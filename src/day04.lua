@@ -3,19 +3,7 @@ local test = require("lib.test")
 
 local DIRECTIONS = {{1, 0}, {1, 1}, {0, 1}, {-1, 1}, {-1, 0}, {-1, -1}, {0, -1}, {1, -1}}
 
-local function prepare_input(input)
-    local lines = io.read_lines_as_array(input)
-    local matr = {}
-    for i, line in ipairs(lines) do
-        matr[i] = {}
-        for ch in line:gfind(".") do
-            table.insert(matr[i], ch)
-        end
-    end
-    return matr
-end
-
-local function check_direction(matr, dir, pos)
+local function check_word(matr, pos, dir)
     local y, x = unpack(pos)
     local dy, dx = unpack(dir)
 
@@ -33,7 +21,7 @@ local function check_direction(matr, dir, pos)
     return false
 end
 
-local function check_direction_x(matr, pos)
+local function check_symbol(matr, pos)
     local y, x = unpack(pos)
 
     if y - 1 <= 0 or y + 1 > #matr then
@@ -55,14 +43,14 @@ local function check_direction_x(matr, pos)
 end
 
 local function part1(data)
-    local matr = prepare_input(data)
+    local matr = io.read_text_matrix(data)
     local xmas = 0
     for y = 1, #matr do
         for x = 1, #matr[y] do
             if matr[y][x] == "X" then
                 local pos = {y, x}
                 for _, dir in ipairs(DIRECTIONS) do
-                    if check_direction(matr, dir, pos) then
+                    if check_word(matr, pos, dir) then
                         xmas = xmas + 1
                     end
                 end
@@ -73,13 +61,13 @@ local function part1(data)
 end
 
 local function part2(data)
-    local matr = prepare_input(data)
+    local matr = io.read_text_matrix(data)
     local xmas = 0
     for y = 1, #matr do
         for x = 1, #matr[y] do
             if matr[y][x] == "A" then
                 local pos = {y, x}
-                if check_direction_x(matr, pos) then
+                if check_symbol(matr, pos) then
                     xmas = xmas + 1
                 end
             end
