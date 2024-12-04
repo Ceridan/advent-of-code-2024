@@ -33,9 +33,8 @@ local function read_lines_as_array(content, transform_fn)
     transform_fn = transform_fn or function(line)
         return line
     end
-
     local lines = {}
-    for line in content:gmatch("[^\n]+") do
+    for line in content:gfind("[^\n]+") do
         table.insert(lines, transform_fn(line))
     end
     return lines
