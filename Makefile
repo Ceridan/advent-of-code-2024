@@ -18,7 +18,9 @@ direnv: # Set environment varaibales
 ##############################################################################
 .PHONY: format
 format: # Format code
-	@lua-format --in-place src/**/*.lua
+	@lua-format --in-place src/*.lua
+	@lua-format --in-place src/lib/*.lua
+	@lua-format --in-place src/struct/*.lua
 
 .PHONY: lint
 lint: # Static code analysis
