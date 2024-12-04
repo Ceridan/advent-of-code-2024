@@ -14,11 +14,7 @@ local function check_word(matr, pos, dir)
         return false
     end
 
-    if matr[y + dy][x + dx] == "M" and matr[y + dy * 2][x + dx * 2] == "A" and matr[y + dy * 3][x + dx * 3] == "S" then
-        return true
-    end
-
-    return false
+    return matr[y + dy][x + dx] == "M" and matr[y + dy * 2][x + dx * 2] == "A" and matr[y + dy * 3][x + dx * 3] == "S"
 end
 
 local function check_symbol(matr, pos)
@@ -31,15 +27,11 @@ local function check_symbol(matr, pos)
         return false
     end
 
-    if (matr[y - 1][x + 1] == "M" and matr[y + 1][x - 1] == "S") or
-        (matr[y - 1][x + 1] == "S" and matr[y + 1][x - 1] == "M") then
-        if (matr[y - 1][x - 1] == "M" and matr[y + 1][x + 1] == "S") or
-            (matr[y - 1][x - 1] == "S" and matr[y + 1][x + 1] == "M") then
-            return true
-        end
-    end
-
-    return false
+    local top_left_ms = matr[y - 1][x - 1] == "M" and matr[y + 1][x + 1] == "S"
+    local top_left_sm = matr[y - 1][x - 1] == "S" and matr[y + 1][x + 1] == "M"
+    local top_right_ms = matr[y - 1][x + 1] == "M" and matr[y + 1][x - 1] == "S"
+    local top_right_sm = matr[y - 1][x + 1] == "S" and matr[y + 1][x - 1] == "M"
+    return (top_left_ms or top_left_sm) and (top_right_ms or top_right_sm)
 end
 
 local function part1(data)
