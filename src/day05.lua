@@ -49,13 +49,17 @@ local function validate(before, update)
     return valid, invalid
 end
 
+local function get_middle(arr)
+    local mid_pos = math.floor((1 + #arr) / 2)
+    return arr[mid_pos]
+end
+
 local function part1(data)
     local before, update = parse_input(data)
     local valid = validate(before, update) or {}
     local mid_sum = 0
     for _, v in ipairs(valid) do
-        local mid_pos = math.floor((1 + #v) / 2)
-        mid_sum = mid_sum + v[mid_pos]
+        mid_sum = mid_sum + get_middle(v)
     end
     return mid_sum
 end
@@ -70,8 +74,7 @@ local function part2(data)
             local intr = Set.intersection(Set.new(inv), before[num])
             top[tbl.table_size(intr) + 1] = num
         end
-        local mid_pos = math.floor((1 + #top) / 2)
-        mid_sum = mid_sum + top[mid_pos]
+        mid_sum = mid_sum + get_middle(top)
     end
     return mid_sum
 end
