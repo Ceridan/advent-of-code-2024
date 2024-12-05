@@ -6,4 +6,12 @@ local function copy_array(arr)
     return copy
 end
 
-return {copy_array = copy_array}
+local function table_size(tbl)
+    local count = 0
+    for _ in pairs(tbl) do
+        count = count + 1
+    end
+    return count
+end
+
+return {copy_array = copy_array, table_size = table_size}

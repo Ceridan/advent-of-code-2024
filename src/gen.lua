@@ -14,6 +14,7 @@ end
 local code_content = [[
 local io = require("lib.io")
 local test = require("lib.test")
+local inspect = require("inspect")
 
 local function parse_input(input)
     return input
