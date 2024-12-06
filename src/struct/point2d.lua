@@ -16,12 +16,20 @@ function Point2D:__sub(other)
     return Point2D.new(self.x - other.x, self.y - other.y)
 end
 
+function Point2D:__eq(other)
+    return self.x == other.x and self.y == other.y
+end
+
 function Point2D:__tostring()
     return string.format("Point2D(%.2f, %.2f)", self.x, self.y)
 end
 
 function Point2D:distance(other)
     return math.sqrt((self.x - other.x) ^ 2 + (self.y - other.y) ^ 2)
+end
+
+function Point2D:key()
+    return string.format("%f_%f", self.x, self.y)
 end
 
 function Point2D:copy()
