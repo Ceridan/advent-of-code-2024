@@ -1,40 +1,8 @@
 local io = require("lib.io")
 local test = require("lib.test")
 local Point2D = require("struct.point2d")
-local Set = require("struct.set")
-local inspect = require("inspect")
 
-local DIRECTIONS = { Point2D.new(0, -1), Point2D.new(1, 0), Point2D.new(0, 1), Point2D.new(-1, 0) }
-
-local function print_map(map, visited, curr, dir_idx)
-    print()
-    local ch = "^"
-    if dir_idx == 1 then
-        ch = "^"
-    elseif dir_idx == 2 then
-        ch = ">"
-    elseif dir_idx == 3 then
-        ch = "v"
-    elseif dir_idx == 4 then
-        ch = "<"
-    end
-
-    for y in ipairs(map) do
-        local row = {}
-        for x in ipairs(map[y]) do
-            if y == curr.y and x == curr.x then
-                table.insert(row, ch)
-            elseif visited[Point2D.new(x, y):key()] then
-                table.insert(row, "X")
-            else
-                table.insert(row, map[y][x])
-            end
-        end
-        print(table.concat(row))
-    end
-
-    print()
-end
+local DIRECTIONS = {Point2D.new(0, -1), Point2D.new(1, 0), Point2D.new(0, 1), Point2D.new(-1, 0)}
 
 local function find_start(map)
     for y in ipairs(map) do
@@ -77,7 +45,6 @@ local function check_visited(map, start)
         end
     end
 end
-
 
 local function check_cycle(map, start, obstacle)
     if start == obstacle then

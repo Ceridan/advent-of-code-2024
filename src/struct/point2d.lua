@@ -29,7 +29,7 @@ function Point2D:distance(other)
 end
 
 function Point2D:key()
-    return string.format("%f_%f", self.x, self.y)
+    return self:__tostring()
 end
 
 function Point2D:copy()
