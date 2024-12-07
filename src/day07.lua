@@ -1,6 +1,5 @@
 local io = require("lib.io")
 local test = require("lib.test")
-local inspect = require("inspect")
 
 local function parse_input(input)
     local matr = io.read_matrix(input, " ")
@@ -11,12 +10,12 @@ local function parse_input(input)
         for i = 2, #row do
             table.insert(numbers, tonumber(row[i]))
         end
-        table.insert(equations, {["target"] = target, ["numbers"] = numbers })
+        table.insert(equations, {["target"] = target, ["numbers"] = numbers})
     end
     return equations
 end
 
-local function dfs(target, numbers, idx, result)
+local function dfs(target, numbers, ops, idx, result)
     if result == target and idx > #numbers then
         return true
     end
@@ -26,60 +25,41 @@ local function dfs(target, numbers, idx, result)
     end
 
     local num = numbers[idx]
-    if dfs(target, numbers, idx + 1, num + result) then
-        return true
-    end
-    if dfs(target, numbers, idx + 1, num * result) then
-        return true
-    end
-
-    return false
-end
-
-local function dfs2(target, numbers, idx, result)
-    if result == target and idx > #numbers then
-        return true
-    end
-
-    if idx > #numbers then
-        return false
-    end
-
-    local num = numbers[idx]
-    if dfs2(target, numbers, idx + 1, num + result) then
-        return true
-    end
-    if dfs2(target, numbers, idx + 1, num * result) then
-        return true
-    end
-    if dfs2(target, numbers, idx + 1, tonumber(result .. num)) then
-        return true
+    for _, op in ipairs(ops) do
+        if op == "+" and dfs(target, numbers, ops, idx + 1, result + num) then
+            return true
+        end
+        if op == "*" and dfs(target, numbers, ops, idx + 1, result * num) then
+            return true
+        end
+        if op == "||" and dfs(target, numbers, ops, idx + 1, tonumber(result .. num)) then
+            return true
+        end
     end
 
     return false
 end
 
-
-local function part1(data)
-    local equations = parse_input(data)
+local function evaluate(equations, ops)
     local valid_sum = 0
     for _, eq in pairs(equations) do
-        if dfs(eq.target, eq.numbers, 2, eq.numbers[1]) then
+        if dfs(eq.target, eq.numbers, ops, 2, eq.numbers[1]) then
             valid_sum = valid_sum + eq.target
         end
     end
     return valid_sum
+end
+
+local function part1(data)
+    local equations = parse_input(data)
+    local ops = {"+", "*"}
+    return evaluate(equations, ops)
 end
 
 local function part2(data)
     local equations = parse_input(data)
-    local valid_sum = 0
-    for _, eq in pairs(equations) do
-        if dfs2(eq.target, eq.numbers, 2, eq.numbers[1]) then
-            valid_sum = valid_sum + eq.target
-        end
-    end
-    return valid_sum
+    local ops = {"+", "*", "||"}
+    return evaluate(equations, ops)
 end
 
 local function main()
