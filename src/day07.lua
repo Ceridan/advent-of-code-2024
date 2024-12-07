@@ -36,6 +36,30 @@ local function dfs(target, numbers, idx, result)
     return false
 end
 
+local function dfs2(target, numbers, idx, result)
+    if result == target and idx > #numbers then
+        return true
+    end
+
+    if idx > #numbers then
+        return false
+    end
+
+    local num = numbers[idx]
+    if dfs2(target, numbers, idx + 1, num + result) then
+        return true
+    end
+    if dfs2(target, numbers, idx + 1, num * result) then
+        return true
+    end
+    if dfs2(target, numbers, idx + 1, tonumber(result .. num)) then
+        return true
+    end
+
+    return false
+end
+
+
 local function part1(data)
     local equations = parse_input(data)
     local valid_sum = 0
@@ -48,14 +72,21 @@ local function part1(data)
 end
 
 local function part2(data)
-    return 0
+    local equations = parse_input(data)
+    local valid_sum = 0
+    for _, eq in pairs(equations) do
+        if dfs2(eq.target, eq.numbers, 2, eq.numbers[1]) then
+            valid_sum = valid_sum + eq.target
+        end
+    end
+    return valid_sum
 end
 
 local function main()
     local input = io.read_file("src/inputs/day07.txt")
 
-    print(string.format("Day 07, part 1: %s", part1(input)))
-    print(string.format("Day 07, part 2: %s", part2(input)))
+    print(string.format("Day 07, part 1: %20.0f", part1(input)))
+    print(string.format("Day 07, part 2: %20.0f", part2(input)))
 end
 
 -- LuaFormatter off
@@ -72,7 +103,7 @@ local TEST_INPUT = [[
 ]]
 
 test(part1(TEST_INPUT), 3749)
--- test(part2(TEST_INPUT), 11387)
+test(part2(TEST_INPUT), 11387)
 -- LuaFormatter on
 
 main()
