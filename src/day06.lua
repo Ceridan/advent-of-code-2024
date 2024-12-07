@@ -1,7 +1,6 @@
 local io = require("lib.io")
 local test = require("lib.test")
 local Point2D = require("struct.point2d")
-local inspect = require("inspect")
 
 local DIRECTIONS = {Point2D.new(0, -1), Point2D.new(1, 0), Point2D.new(0, 1), Point2D.new(-1, 0)}
 
@@ -28,6 +27,10 @@ local function next_dir_idx(idx)
     end
 end
 
+local function rev_dir_idx(idx)
+    return next_dir_idx(next_dir_idx(idx))
+end
+
 local function build_obstacles_map(map)
     local obstacles_map = {}
 
@@ -37,7 +40,7 @@ local function build_obstacles_map(map)
         for x in ipairs(map[y]) do
             local curr = Point2D.new(x, y)
             if map[y][x] == "#" then
-                for i = prev_idx + 1, x-1 do
+                for i = prev_idx + 1, x - 1 do
                     local key = Point2D.new(i, y):key()
                     obstacles_map[key][2] = curr
                     obstacles_map[key][4] = prev
@@ -60,7 +63,7 @@ local function build_obstacles_map(map)
         for y in ipairs(map) do
             if map[y][x] == "#" then
                 local curr = Point2D.new(x, y)
-                for i = prev_idx + 1, y-1 do
+                for i = prev_idx + 1, y - 1 do
                     local key = Point2D.new(x, i):key()
                     obstacles_map[key][1] = prev
                     obstacles_map[key][3] = curr
@@ -76,24 +79,6 @@ local function build_obstacles_map(map)
     end
 
     return obstacles_map
-end
-
-local function check_visited(map, start)
-    local dir_idx = 1
-    local curr = start
-    local visited = {[curr:key()] = curr}
-
-    while true do
-        local next_curr = curr + DIRECTIONS[dir_idx]
-        if is_out_of_bound(map, next_curr) then
-            return visited
-        elseif map[next_curr.y][next_curr.x] == "#" then
-            dir_idx = next_dir_idx(dir_idx)
-        else
-            curr = next_curr
-            visited[curr:key()] = curr
-        end
-    end
 end
 
 local function next_obstacle(obstacles_map, curr, dir, obstacle)
@@ -115,8 +100,22 @@ local function next_obstacle(obstacles_map, curr, dir, obstacle)
     return wall
 end
 
-local function rev_dir_idx(idx)
-    return next_dir_idx(next_dir_idx(idx))
+local function check_visited(map, start)
+    local dir_idx = 1
+    local curr = start
+    local visited = {[curr:key()] = curr}
+
+    while true do
+        local next_curr = curr + DIRECTIONS[dir_idx]
+        if is_out_of_bound(map, next_curr) then
+            return visited
+        elseif map[next_curr.y][next_curr.x] == "#" then
+            dir_idx = next_dir_idx(dir_idx)
+        else
+            curr = next_curr
+            visited[curr:key()] = curr
+        end
+    end
 end
 
 local function check_cycle(obstacles_map, start, obstacle)
