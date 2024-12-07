@@ -1,6 +1,7 @@
 local io = require("lib.io")
 local test = require("lib.test")
 local Point2D = require("struct.point2d")
+local inspect = require("inspect")
 
 local DIRECTIONS = {Point2D.new(0, -1), Point2D.new(1, 0), Point2D.new(0, 1), Point2D.new(-1, 0)}
 
@@ -27,79 +28,54 @@ local function next_dir_idx(idx)
     end
 end
 
-local function compact_map(map)
-    local compacted = {["y"] = {}, ["x"] = {}}
+local function build_obstacles_map(map)
+    local obstacles_map = {}
 
     for y in ipairs(map) do
-        compacted.y[y] = {}
+        local prev = nil
+        local prev_idx = 0
         for x in ipairs(map[y]) do
+            local curr = Point2D.new(x, y)
             if map[y][x] == "#" then
-                table.insert(compacted.y[y], x)
+                for i = prev_idx + 1, x-1 do
+                    local key = Point2D.new(i, y):key()
+                    obstacles_map[key][2] = curr
+                    obstacles_map[key][4] = prev
+                end
+                prev = curr
+                prev_idx = x
+            else
+                obstacles_map[curr:key()] = {}
             end
+        end
+        for i = prev_idx + 1, #map[y] do
+            local key = Point2D.new(i, y):key()
+            obstacles_map[key][4] = prev
         end
     end
 
     for x in ipairs(map[1]) do
-        compacted.x[x] = {}
+        local prev = nil
+        local prev_idx = 0
         for y in ipairs(map) do
             if map[y][x] == "#" then
-                table.insert(compacted.x[x], y)
+                local curr = Point2D.new(x, y)
+                for i = prev_idx + 1, y-1 do
+                    local key = Point2D.new(x, i):key()
+                    obstacles_map[key][1] = prev
+                    obstacles_map[key][3] = curr
+                end
+                prev = curr
+                prev_idx = y
             end
         end
-    end
-
-    return compacted
-end
-
-local function search_compacted(compacted, pos, dir)
-    local map
-    local inner, outer
-    if dir == 1 or dir == 3 then
-        map = compacted.x
-        inner = pos.x
-        outer = pos.y
-    else
-        map = compacted.y
-        inner = pos.y
-        outer = pos.x
-    end
-
-    local l, r = 1, #map[inner]
-    while l <= r do
-        local mid = math.floor((l + r) / 2)
-        if map[inner][mid] > outer then
-            r = mid - 1
-        else
-            l = mid + 1
+        for i = prev_idx + 1, #map[1] do
+            local key = Point2D.new(x, i):key()
+            obstacles_map[key][1] = prev
         end
     end
 
-    l, r = r, l
-    if dir == 1 then
-        local y = 0
-        if l > 0 then
-            y = map[inner][l]
-        end
-        return pos.x, y
-    elseif dir == 2 then
-        local x = 0
-        if r <= #map[inner] then
-            x = map[inner][r]
-        end
-        return x, pos.y
-    elseif dir == 3 then
-        local y = 0
-        if r <= #map[inner] then
-            y = map[inner][r]
-        end
-        return pos.x, y
-    elseif dir == 4 then
-        local x = 0
-        if l > 0 then
-            x = map[inner][l]
-        end
-        return x, pos.y
-    end
+    return obstacles_map
 end
 
 local function check_visited(map, start)
@@ -120,7 +96,30 @@ local function check_visited(map, start)
     end
 end
 
-local function check_cycle(compacted_map, start, obstacle)
+local function next_obstacle(obstacles_map, curr, dir, obstacle)
+    local wall = obstacles_map[curr:key()][dir]
+
+    if dir == 1 and obstacle.x == curr.x and obstacle.y < curr.y and (wall == nil or wall.y < obstacle.y) then
+        return obstacle
+    end
+    if dir == 2 and obstacle.y == curr.y and obstacle.x > curr.x and (wall == nil or wall.x > obstacle.x) then
+        return obstacle
+    end
+    if dir == 3 and obstacle.x == curr.x and obstacle.y > curr.y and (wall == nil or wall.y > obstacle.y) then
+        return obstacle
+    end
+    if dir == 4 and obstacle.y == curr.y and obstacle.x < curr.x and (wall == nil or wall.x < obstacle.x) then
+        return obstacle
+    end
+
+    return wall
+end
+
+local function rev_dir_idx(idx)
+    return next_dir_idx(next_dir_idx(idx))
+end
+
+local function check_cycle(obstacles_map, start, obstacle)
     if start == obstacle then
         return false
     end
@@ -137,22 +136,11 @@ local function check_cycle(compacted_map, start, obstacle)
             state[key] = true
         end
 
-        local ox, oy = search_compacted(compacted_map, curr, dir_idx)
-        if ox == 0 or oy == 0 then
+        local obst = next_obstacle(obstacles_map, curr, dir_idx, obstacle)
+        if obst == nil then
             return false
         else
-            local bidx
-            if dir_idx == 1 then
-                bidx = 3
-            elseif dir_idx == 2 then
-                bidx = 4
-            elseif dir_idx == 3 then
-                bidx = 1
-            else
-                bidx = 2
-            end
-
-            curr = Point2D.new(ox, oy) + DIRECTIONS[bidx]
+            curr = obst + DIRECTIONS[rev_dir_idx(dir_idx)]
             dir_idx = next_dir_idx(dir_idx)
         end
     end
@@ -174,35 +162,11 @@ local function part2(data)
     local map = io.read_text_matrix(data)
     local start = find_start(map)
     local visited = check_visited(map, start)
-    local compacted = compact_map(map)
+    local obstacles_map = build_obstacles_map(map)
     local cycle = 0
     for _, vis in pairs(visited) do
-        if vis ~= start then
-            table.insert(compacted.x[vis.x], vis.y)
-            table.sort(compacted.x[vis.x])
-            table.insert(compacted.y[vis.y], vis.x)
-            table.sort(compacted.y[vis.y])
-
-            if check_cycle(compacted, start, vis) then
-                cycle = cycle + 1
-            end
-
-            local i = 1
-            while true do
-                if compacted.x[vis.x][i] == vis.y then
-                    break
-                end
-                i = i + 1
-            end
-            table.remove(compacted.x[vis.x], i)
-            i = 1
-            while true do
-                if compacted.y[vis.y][i] == vis.x then
-                    break
-                end
-                i = i + 1
-            end
-            table.remove(compacted.y[vis.y], i)
+        if check_cycle(obstacles_map, start, vis) then
+            cycle = cycle + 1
         end
     end
     return cycle
