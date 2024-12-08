@@ -36,9 +36,12 @@ local function main()
 end
 
 -- LuaFormatter off
-test(part1({}), 0)
+local TEST_INPUT = [[
+%]%]
 
-test(part2({}), 0)
+test(part1(TEST_INPUT), 0)
+
+test(part2(TEST_INPUT), 0)
 -- LuaFormatter on
 
 main()
