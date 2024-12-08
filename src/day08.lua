@@ -1,7 +1,6 @@
 local io = require("lib.io")
 local test = require("lib.test")
 local Point2D = require("struct.point2d")
-local inspect = require("inspect")
 
 local function compact_map(map)
     local compacted = {}
@@ -17,10 +16,9 @@ local function compact_map(map)
     return compacted
 end
 
-local function part1(data)
-    local map = io.read_text_matrix(data)
-    local compacted = compact_map(map)
+local function calculate_antinodes(map, antinode_fn)
     local size = #map
+    local compacted = compact_map(map)
     local visited = {}
     local antinodes = {}
     for loc, ant in pairs(compacted) do
@@ -28,11 +26,7 @@ local function part1(data)
             visited[loc] = true
             for oloc, oant in pairs(compacted) do
                 if loc ~= oloc and ant.char == oant.char then
-                    local diff = ant.point - oant.point
-                    local antinode = ant.point + diff
-                    if antinode.x > 0 and antinode.x <= size and antinode.y > 0 and antinode.y <= size then
-                        antinodes[antinode:key()] = true
-                    end
+                    antinode_fn(antinodes, size, ant.point, oant.point)
                 end
             end
         end
@@ -45,41 +39,34 @@ local function part1(data)
     return count
 end
 
-local function part2(data)
+local function part1(data)
     local map = io.read_text_matrix(data)
-    local compacted = compact_map(map)
-    local size = #map
-    local visited = {}
-    local antinodes = {}
-    for loc, ant in pairs(compacted) do
-        if not visited[loc] then
-            visited[loc] = true
-            for oloc, oant in pairs(compacted) do
-                if loc ~= oloc and ant.char == oant.char then
-                    local diff = ant.point - oant.point
-                    local i = 0
-                    while true do
-                        local antinode = ant.point + diff:const_mult(i)
-                        -- print(ant.point, oant.point, diff, diff:const_mult(i), antinode)
-                        if antinode.x > 0 and antinode.x <= size and antinode.y > 0 and antinode.y <= size then
-                            antinodes[antinode:key()] = true
-                        else
-                            break
-                        end
-                        i = i + 1
-                    end
-
-                end
-            end
+    local antinode_fn = function(antinodes, size, this, other)
+        local diff = this - other
+        local antinode = this + diff
+        if antinode.x > 0 and antinode.x <= size and antinode.y > 0 and antinode.y <= size then
+            antinodes[antinode:key()] = true
         end
     end
+    return calculate_antinodes(map, antinode_fn)
+end
 
-    local count = 0
-    for k, v in pairs(antinodes) do
-        -- print(k)
-        count = count + 1
+local function part2(data)
+    local map = io.read_text_matrix(data)
+    local antinode_fn = function(antinodes, size, this, other)
+        local diff = this - other
+        local i = 0
+        while true do
+            local antinode = this + diff:const_mult(i)
+            if antinode.x > 0 and antinode.x <= size and antinode.y > 0 and antinode.y <= size then
+                antinodes[antinode:key()] = true
+            else
+                break
+            end
+            i = i + 1
+        end
     end
-    return count
+    return calculate_antinodes(map, antinode_fn)
 end
 
 local function main()
@@ -90,21 +77,6 @@ local function main()
 end
 
 -- LuaFormatter off
-local TEST_INPUT = [[
-............
-........0...
-.....0......
-.......0....
-....0.......
-......A.....
-............
-............
-........A...
-.........A..
-............
-............
-]]
-
 test(part1([[
 ............
 ........0...
@@ -119,7 +91,6 @@ test(part1([[
 ............
 ............
 ]]), 14)
-
 
 test(part2([[
 T.........
