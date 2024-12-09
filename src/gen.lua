@@ -11,7 +11,7 @@ if io.file_exists(code_filename) then
     os.exit(1)
 end
 
-local code_content = [[
+local code_content = [=[
 local io = require("lib.io")
 local test = require("lib.test")
 local inspect = require("inspect")
@@ -37,7 +37,7 @@ end
 
 -- LuaFormatter off
 local TEST_INPUT = [[
-%]%]
+]]
 
 test(part1(TEST_INPUT), 0)
 
@@ -45,7 +45,7 @@ test(part2(TEST_INPUT), 0)
 -- LuaFormatter on
 
 main()
-]]
+]=]
 code_content = code_content:gsub("{{DAY}}", day)
 
 -- Download input
