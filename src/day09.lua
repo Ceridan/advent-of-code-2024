@@ -69,7 +69,6 @@ local function part2(data)
                 disk_to_index[i] = disk_to_index[i] + disk[k]
                 disk[i] = disk[i] - disk[k]
                 disk[k] = 0
-                break
             end
         end
     end
