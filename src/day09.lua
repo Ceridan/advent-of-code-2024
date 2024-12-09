@@ -21,6 +21,10 @@ local function build_disk_to_index(disk)
     return disk_to_index
 end
 
+local function calculate_checksum(idx, id, count)
+    return (2 * idx + count - 1) * count / 2 * id
+end
+
 local function part1(data)
     local disk = parse_input(data)
     local disk_to_index = build_disk_to_index(disk)
@@ -33,7 +37,7 @@ local function part1(data)
 
             if disk[i] > 0 then
                 local count = math.min(disk[i], disk[k])
-                checksum = checksum + (2 * disk_to_index[i] + count - 1) * count / 2 * (k - 1) / 2
+                checksum = checksum + calculate_checksum(disk_to_index[i], (k - 1) / 2, count)
                 disk_to_index[i] = disk_to_index[i] + count
                 disk[i] = disk[i] - count
                 disk[k] = disk[k] - count
@@ -43,7 +47,7 @@ local function part1(data)
 
     for k = 1, #disk, 2 do
         if disk[k] > 0 then
-            checksum = checksum + (2 * disk_to_index[k] + disk[k] - 1) * disk[k] / 2 * (k - 1) / 2
+            checksum = checksum + calculate_checksum(disk_to_index[k], (k - 1) / 2, disk[k])
         end
     end
 
@@ -61,7 +65,7 @@ local function part2(data)
             end
 
             if disk[i] >= disk[k] then
-                checksum = checksum + (2 * disk_to_index[i] + disk[k] - 1) * disk[k] / 2 * (k - 1) / 2
+                checksum = checksum + calculate_checksum(disk_to_index[i], (k - 1) / 2, disk[k])
                 disk_to_index[i] = disk_to_index[i] + disk[k]
                 disk[i] = disk[i] - disk[k]
                 disk[k] = 0
@@ -72,7 +76,7 @@ local function part2(data)
 
     for k = 1, #disk, 2 do
         if disk[k] > 0 then
-            checksum = checksum + (2 * disk_to_index[k] + disk[k] - 1) * disk[k] / 2 * (k - 1) / 2
+            checksum = checksum + calculate_checksum(disk_to_index[k], (k - 1) / 2, disk[k])
         end
     end
 
