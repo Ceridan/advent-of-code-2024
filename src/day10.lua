@@ -43,14 +43,14 @@ local function parse_input(input)
     return compacted, trailheads
 end
 
-local function dfs(map, pos)
+local function dfs1(map, pos)
     if map[pos].value == 9 then
         return {[pos] = true}
     end
 
     local res = {}
     for _, next_pos in ipairs(map[pos].moves) do
-        local nines = dfs(map, next_pos)
+        local nines = dfs1(map, next_pos)
         for nine in pairs(nines) do
             res[nine] = true
         end
@@ -59,11 +59,24 @@ local function dfs(map, pos)
     return res
 end
 
+local function dfs2(map, pos)
+    if map[pos].value == 9 then
+        return 1
+    end
+
+    local paths = 0
+    for _, next_pos in ipairs(map[pos].moves) do
+        paths = paths + dfs2(map, next_pos)
+    end
+
+    return paths
+end
+
 local function part1(data)
     local map, trailheads = parse_input(data)
     local paths = 0
     for _, start in ipairs(trailheads) do
-        local res = dfs(map, start)
+        local res = dfs1(map, start)
         for nine in pairs(res) do
             paths = paths + 1
         end
@@ -72,7 +85,13 @@ local function part1(data)
 end
 
 local function part2(data)
-    return 0
+    local map, trailheads = parse_input(data)
+    local paths = 0
+    for _, start in ipairs(trailheads) do
+        local res = dfs2(map, start)
+        paths = paths + res
+    end
+    return paths
 end
 
 local function main()
@@ -132,8 +151,44 @@ test(part1([[
 ]]), 36)
 
 test(part2([[
+.....0.
+..4321.
+..5..2.
+..6543.
+..7..4.
+..8765.
+..9....
+]]), 3)
 
-]]), 0)
+test(part2([[
+..90..9
+...1.98
+...2..7
+6543456
+765.987
+876....
+987....
+]]), 13)
+
+test(part2([[
+012345
+123456
+234567
+345678
+4.6789
+56789.
+]]), 227)
+
+test(part2([[
+89010123
+78121874
+87430965
+96549874
+45678903
+32019012
+01329801
+10456732
+]]), 81)
 -- LuaFormatter on
 
 main()
