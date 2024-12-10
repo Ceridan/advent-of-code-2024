@@ -1,7 +1,6 @@
 local io = require("lib.io")
 local test = require("lib.test")
 local Point2D = require("struct.point2d")
-local inspect = require("inspect")
 
 local DIRECTIONS = {Point2D.new(0, -1), Point2D.new(1, 0), Point2D.new(0, 1), Point2D.new(-1, 0)}
 
@@ -28,11 +27,7 @@ local function parse_input(input)
             if map[y][x] ~= "." then
                 local pos = Point2D.new(x, y)
                 local val = tonumber(map[y][x])
-                local curr = {
-                    ["point"] = pos,
-                    ["value"] = val,
-                    ["moves"] = get_reachable_points(map, pos, val)
-                }
+                local curr = {["point"] = pos, ["value"] = val, ["moves"] = get_reachable_points(map, pos, val)}
                 compacted[pos:key()] = curr
                 if val == 0 then
                     table.insert(trailheads, pos:key())
@@ -43,55 +38,47 @@ local function parse_input(input)
     return compacted, trailheads
 end
 
-local function dfs1(map, pos)
+local function dfs(map, pos)
     if map[pos].value == 9 then
-        return {[pos] = true}
+        return {[pos] = 1}
     end
 
     local res = {}
     for _, next_pos in ipairs(map[pos].moves) do
-        local nines = dfs1(map, next_pos)
-        for nine in pairs(nines) do
-            res[nine] = true
+        local nines = dfs(map, next_pos)
+        for nine, num in pairs(nines) do
+            res[nine] = (res[nine] or 0) + num
         end
     end
 
     return res
 end
 
-local function dfs2(map, pos)
-    if map[pos].value == 9 then
-        return 1
+local function calculate_trails(map, trailheads, score_fn)
+    local score = 0
+    for _, start in ipairs(trailheads) do
+        local res = dfs(map, start)
+        for _, cnt in pairs(res) do
+            score = score + score_fn(cnt)
+        end
     end
-
-    local paths = 0
-    for _, next_pos in ipairs(map[pos].moves) do
-        paths = paths + dfs2(map, next_pos)
-    end
-
-    return paths
+    return score
 end
 
 local function part1(data)
     local map, trailheads = parse_input(data)
-    local paths = 0
-    for _, start in ipairs(trailheads) do
-        local res = dfs1(map, start)
-        for nine in pairs(res) do
-            paths = paths + 1
-        end
+    local score_fn = function()
+        return 1
     end
-    return paths
+    return calculate_trails(map, trailheads, score_fn)
 end
 
 local function part2(data)
     local map, trailheads = parse_input(data)
-    local paths = 0
-    for _, start in ipairs(trailheads) do
-        local res = dfs2(map, start)
-        paths = paths + res
+    local score_fn = function(cnt)
+        return cnt
     end
-    return paths
+    return calculate_trails(map, trailheads, score_fn)
 end
 
 local function main()

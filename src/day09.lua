@@ -1,6 +1,5 @@
 local io = require("lib.io")
 local test = require("lib.test")
-local inspect = require("inspect")
 
 local function parse_input(input)
     local arr = io.read_text_matrix(input)[1]
