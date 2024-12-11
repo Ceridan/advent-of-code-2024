@@ -17,28 +17,34 @@ local function apply_rules(stone)
     return tostring(stone * 2024)
 end
 
-local function part1(data, blinks)
-    local arr = io.read_matrix(data, " ")[1]
+local function count_stones(stones, blinks)
     local cache = {}
-
+    print(inspect(stones))
     for i = 1, blinks do
-        local new_arr = {}
-        while #arr > 0 do
-            local stone = arr[1]
-            table.remove(arr, 1)
+        local new_stones = {}
+        for j = 1, #stones do
+            local stone = stones[j]
             local stone1, stone2 = unpack(cache[stone] or {apply_rules(stone)})
             cache[stone] = {stone1, stone2}
-            table.insert(new_arr, stone1)
+            table.insert(new_stones, stone1)
             if stone2 ~= nil then
-                table.insert(new_arr, stone2)
+                table.insert(new_stones, stone2)
             end
         end
-        arr = new_arr
+        print(i, #stones)
+        stones = new_stones
     end
-    return #arr
+    return #stones
+end
+
+local function part1(data, blinks)
+    local stones = io.read_matrix(data, " ")[1]
+    return count_stones(stones, blinks)
 end
 
 local function part2(data, blinks)
+    local stones = io.read_matrix(data, " ")[1]
+    -- return count_stones(stones, blinks)
     return 0
 end
 
