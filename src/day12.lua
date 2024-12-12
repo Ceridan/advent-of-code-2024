@@ -4,19 +4,19 @@ local Point2D = require("struct.point2d")
 
 local DIRECTIONS = {Point2D.new(0, -1), Point2D.new(1, 0), Point2D.new(0, 1), Point2D.new(-1, 0)}
 
-local function count_corners(map, curr, points_to_groups)
+local function count_corners(map, curr)
     local x, y = curr.x, curr.y
 
     -- LuaFormatter off
-    local c = map[y][x] .. points_to_groups[y][x]
-    local tl = "."; if y > 1 and x > 1 then tl = map[y-1][x-1] .. points_to_groups[y-1][x-1]end
-    local t = "."; if y > 1 then t = map[y-1][x] .. points_to_groups[y-1][x] end
-    local tr = "."; if y > 1 and x < #map then tr = map[y-1][x+1] .. points_to_groups[y-1][x+1] end
-    local l = "."; if x > 1 then l = map[y][x-1] .. points_to_groups[y][x-1] end
-    local bl = "."; if y < #map and x > 1 then bl = map[y+1][x-1] .. points_to_groups[y+1][x-1] end
-    local b = "."; if y < #map then b = map[y+1][x] .. points_to_groups[y+1][x] end
-    local br = "."; if y < #map and x < #map then br = map[y+1][x+1] .. points_to_groups[y+1][x+1] end
-    local r = "."; if x < #map then r = map[y][x+1] .. points_to_groups[y][x+1] end
+    local c = map[y][x]
+    local tl = "."; if y > 1 and x > 1 then tl = map[y-1][x-1] end
+    local t = "."; if y > 1 then t = map[y-1][x] end
+    local tr = "."; if y > 1 and x < #map then tr = map[y-1][x+1] end
+    local l = "."; if x > 1 then l = map[y][x-1] end
+    local bl = "."; if y < #map and x > 1 then bl = map[y+1][x-1] end
+    local b = "."; if y < #map then b = map[y+1][x] end
+    local br = "."; if y < #map and x < #map then br = map[y+1][x+1] end
+    local r = "."; if x < #map then r = map[y][x+1] end
     -- LuaFormatter on
 
     local corners = 0
@@ -65,7 +65,7 @@ local function calculate_borders(map, points_to_groups)
         for x = 1, #map do
             local curr = Point2D.new(x, y)
             local group = points_to_groups[y][x]
-            borders[group] = (borders[group] or 0) + count_corners(map, curr, points_to_groups)
+            borders[group] = (borders[group] or 0) + count_corners(map, curr)
         end
     end
     return borders
