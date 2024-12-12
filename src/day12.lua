@@ -4,6 +4,25 @@ local Point2D = require("struct.point2d")
 
 local DIRECTIONS = {Point2D.new(0, -1), Point2D.new(1, 0), Point2D.new(0, 1), Point2D.new(-1, 0)}
 
+-- LuaFormatter off
+local function count_sides(map, curr)
+    local x, y = curr.x, curr.y
+
+    local c = map[y][x]
+    local t = "."; if y > 1 then t = map[y-1][x] end
+    local l = "."; if x > 1 then l = map[y][x-1] end
+    local b = "."; if y < #map then b = map[y+1][x] end
+    local r = "."; if x < #map then r = map[y][x+1] end
+
+    local sides = 0
+    if c ~= t then sides = sides + 1 end
+    if c ~= l then sides = sides + 1 end
+    if c ~= b then sides = sides + 1 end
+    if c ~= r then sides = sides + 1 end
+    return sides
+end
+-- LuaFormatter on
+
 local function count_corners(map, curr)
     local x, y = curr.x, curr.y
 
@@ -32,26 +51,25 @@ local function count_corners(map, curr)
     if (c ~= b and c ~= r) or (c ~= br and c == b and c == r) then
         corners = corners + 1
     end
-
     return corners
 end
 
-local function calculate_area_and_perimeter(map, curr, ch, group, points_to_groups)
-    if curr.x <= 0 or curr.x > #map or curr.y <= 0 or curr.y > #map or ch ~= map[curr.y][curr.x] then
-        return 0, 1
-    end
-
-    if points_to_groups[curr.y] and points_to_groups[curr.y][curr.x] then
+local function dfs(map, curr, ch, visited, perimeter_fn)
+    if visited[curr:key()] then
         return 0, 0
     end
 
-    points_to_groups[curr.y] = (points_to_groups[curr.y] or {})
-    points_to_groups[curr.y][curr.x] = group
+    if curr.x <= 0 or curr.x > #map or curr.y <= 0 or curr.y > #map or ch ~= map[curr.y][curr.x] then
+        return 0, 0
+    end
+
+    visited[curr:key()] = true
+
     local a = 1
-    local p = 0
+    local p = perimeter_fn(map, curr)
 
     for _, dir in ipairs(DIRECTIONS) do
-        local oa, op = calculate_area_and_perimeter(map, curr + dir, ch, group, points_to_groups)
+        local oa, op = dfs(map, curr + dir, ch, visited, perimeter_fn)
         a = a + oa
         p = p + op
     end
@@ -59,55 +77,27 @@ local function calculate_area_and_perimeter(map, curr, ch, group, points_to_grou
     return a, p
 end
 
-local function calculate_borders(map, points_to_groups)
-    local borders = {}
-    for y = 1, #map do
-        for x = 1, #map do
-            local curr = Point2D.new(x, y)
-            local group = points_to_groups[y][x]
-            borders[group] = (borders[group] or 0) + count_corners(map, curr)
-        end
-    end
-    return borders
-end
-
-local function part1(data)
-    local map = io.read_text_matrix(data)
-    local points_to_groups = {}
+local function calcaulate_price(map, perimeter_fn)
+    local visited = {}
     local price = 0
     for y in ipairs(map) do
         for x in ipairs(map) do
             local curr = Point2D.new(x, y)
-            local group = curr:key()
-            local a, p = calculate_area_and_perimeter(map, curr, map[y][x], group, points_to_groups)
+            local a, p = dfs(map, curr, map[y][x], visited, perimeter_fn)
             price = price + a * p
         end
     end
     return price
 end
 
+local function part1(data)
+    local map = io.read_text_matrix(data)
+    return calcaulate_price(map, count_sides)
+end
+
 local function part2(data)
     local map = io.read_text_matrix(data)
-    local points_to_groups = {}
-    local group_to_area = {}
-    for y in ipairs(map) do
-        for x in ipairs(map) do
-            local curr = Point2D.new(x, y)
-            local group = curr:key()
-            local a = calculate_area_and_perimeter(map, curr, map[y][x], group, points_to_groups)
-            if a > 0 then
-                group_to_area[group] = a
-            end
-        end
-    end
-
-    local group_to_border = calculate_borders(map, points_to_groups)
-
-    local price = 0
-    for group in pairs(group_to_border) do
-        price = price + group_to_border[group] * group_to_area[group]
-    end
-    return price
+    return calcaulate_price(map, count_corners)
 end
 
 local function main()
