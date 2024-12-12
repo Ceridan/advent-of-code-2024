@@ -34,9 +34,9 @@ local function count_corners(map, curr, points_to_groups)
     return corners
 end
 
-local function dfs(map, curr, ch, group, points_to_groups)
+local function calculate_area_and_perimeter(map, curr, ch, group, points_to_groups)
     if curr.x <= 0 or curr.x > #map or curr.y <= 0 or curr.y > #map or ch ~= map[curr.y][curr.x] then
-        return 1, 0
+        return 0, 1
     end
 
     if points_to_groups[curr.y] and points_to_groups[curr.y][curr.x] then
@@ -45,16 +45,16 @@ local function dfs(map, curr, ch, group, points_to_groups)
 
     points_to_groups[curr.y] = (points_to_groups[curr.y] or {})
     points_to_groups[curr.y][curr.x] = group
-    local p = 0
     local a = 1
+    local p = 0
 
     for _, dir in ipairs(DIRECTIONS) do
-        local op, oa = dfs(map, curr + dir, ch, group, points_to_groups)
-        p = p + op
+        local oa, op = calculate_area_and_perimeter(map, curr + dir, ch, group, points_to_groups)
         a = a + oa
+        p = p + op
     end
 
-    return p, a
+    return a, p
 end
 
 local function calculate_borders(map, points_to_groups)
@@ -70,36 +70,36 @@ local function calculate_borders(map, points_to_groups)
 end
 
 local function part1(data)
-    local garden = io.read_text_matrix(data)
-    local groups = {}
+    local map = io.read_text_matrix(data)
+    local points_to_groups = {}
     local price = 0
-    for y in ipairs(garden) do
-        for x in ipairs(garden) do
+    for y in ipairs(map) do
+        for x in ipairs(map) do
             local curr = Point2D.new(x, y)
             local group = curr:key()
-            local p, a = dfs(garden, curr, garden[y][x], group, groups)
-            price = price + p * a
+            local a, p = calculate_area_and_perimeter(map, curr, map[y][x], group, points_to_groups)
+            price = price + a * p
         end
     end
     return price
 end
 
 local function part2(data)
-    local garden = io.read_text_matrix(data)
+    local map = io.read_text_matrix(data)
     local points_to_groups = {}
     local group_to_area = {}
-    for y in ipairs(garden) do
-        for x in ipairs(garden) do
+    for y in ipairs(map) do
+        for x in ipairs(map) do
             local curr = Point2D.new(x, y)
             local group = curr:key()
-            local p, a = dfs(garden, curr, garden[y][x], group, points_to_groups)
+            local a = calculate_area_and_perimeter(map, curr, map[y][x], group, points_to_groups)
             if a > 0 then
                 group_to_area[group] = a
             end
         end
     end
 
-    local group_to_border = calculate_borders(garden, points_to_groups)
+    local group_to_border = calculate_borders(map, points_to_groups)
 
     local price = 0
     for group in pairs(group_to_border) do
