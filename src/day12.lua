@@ -4,24 +4,17 @@ local Point2D = require("struct.point2d")
 
 local DIRECTIONS = {Point2D.new(0, -1), Point2D.new(1, 0), Point2D.new(0, 1), Point2D.new(-1, 0)}
 
--- LuaFormatter off
 local function count_sides(map, curr)
-    local x, y = curr.x, curr.y
-
-    local c = map[y][x]
-    local t = "."; if y > 1 then t = map[y-1][x] end
-    local l = "."; if x > 1 then l = map[y][x-1] end
-    local b = "."; if y < #map then b = map[y+1][x] end
-    local r = "."; if x < #map then r = map[y][x+1] end
-
     local sides = 0
-    if c ~= t then sides = sides + 1 end
-    if c ~= l then sides = sides + 1 end
-    if c ~= b then sides = sides + 1 end
-    if c ~= r then sides = sides + 1 end
+    for _, dir in ipairs(DIRECTIONS) do
+        local other = curr + dir
+        if other.x <= 0 or other.x > #map or other.y <= 0 or other.y > #map or map[other.y][other.x] ~=
+            map[curr.y][curr.x] then
+            sides = sides + 1
+        end
+    end
     return sides
 end
--- LuaFormatter on
 
 local function count_corners(map, curr)
     local x, y = curr.x, curr.y
