@@ -7,6 +7,7 @@ local DIRECTIONS = {Point2D.new(0, -1), Point2D.new(1, 0), Point2D.new(0, 1), Po
 local function count_corners(map, curr, points_to_groups)
     local x, y = curr.x, curr.y
 
+    -- LuaFormatter off
     local c = map[y][x] .. points_to_groups[y][x]
     local tl = "."; if y > 1 and x > 1 then tl = map[y-1][x-1] .. points_to_groups[y-1][x-1]end
     local t = "."; if y > 1 then t = map[y-1][x] .. points_to_groups[y-1][x] end
@@ -16,6 +17,7 @@ local function count_corners(map, curr, points_to_groups)
     local b = "."; if y < #map then b = map[y+1][x] .. points_to_groups[y+1][x] end
     local br = "."; if y < #map and x < #map then br = map[y+1][x+1] .. points_to_groups[y+1][x+1] end
     local r = "."; if x < #map then r = map[y][x+1] .. points_to_groups[y][x+1] end
+    -- LuaFormatter on
 
     local corners = 0
     if (c ~= t and c ~= l) or (c ~= tl and c == t and c == l) then
@@ -24,7 +26,7 @@ local function count_corners(map, curr, points_to_groups)
     if (c ~= t and c ~= r) or (c ~= tr and c == t and c == r) then
         corners = corners + 1
     end
-    if  (c ~= b and c ~= l) or (c ~= bl and c == b and c == l) then
+    if (c ~= b and c ~= l) or (c ~= bl and c == b and c == l) then
         corners = corners + 1
     end
     if (c ~= b and c ~= r) or (c ~= br and c == b and c == r) then
