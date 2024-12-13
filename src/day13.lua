@@ -55,18 +55,49 @@ local function dfs(machine, pos, a, b, cache)
     end
 end
 
+local function solve(machine)
+    local ax, ay = machine.a.x, machine.a.y
+    local bx, by = machine.b.x, machine.b.y
+    local px, py = machine.prize.x, machine.prize.y
+
+    local a = math.floor((px * by - bx * py) / (ax * by - bx * ay))
+    local b = math.floor((ax * py - px * ay) / (ax * by - bx * ay))
+
+    if a * ax + b * bx == px and a * ay + b * by == py then
+        return a * A_TOKENS + b * B_TOKENS
+    end
+
+    return 0
+end
+
+-- local count_tokens(machines)
+
 local function part1(data)
+    -- local machines = parse_input(data)
+    -- local total_tokens = 0
+    -- for _, machine in ipairs(machines) do
+    --     local cache = {}
+    --     total_tokens = total_tokens + dfs(machine, Point2D.new(0, 0), 0, 0, cache)
+    -- end
+    -- return total_tokens
+
     local machines = parse_input(data)
     local total_tokens = 0
     for _, machine in ipairs(machines) do
-        local cache = {}
-        total_tokens = total_tokens + dfs(machine, Point2D.new(0, 0), 0, 0, cache)
+        total_tokens = total_tokens + solve(machine)
     end
     return total_tokens
 end
 
 local function part2(data)
-    return 0
+    local machines = parse_input(data)
+    local total_tokens = 0
+    for _, machine in ipairs(machines) do
+        machine.prize.x = machine.prize.x + 10000000000000
+        machine.prize.y = machine.prize.y + 10000000000000
+        total_tokens = total_tokens + solve(machine)
+    end
+    return total_tokens
 end
 
 local function main()
@@ -77,7 +108,7 @@ local function main()
 end
 
 -- LuaFormatter off
-local TEST_INPUT = [[
+test(part1([[
 Button A: X+94, Y+34
 Button B: X+22, Y+67
 Prize: X=8400, Y=5400
@@ -93,11 +124,7 @@ Prize: X=7870, Y=6450
 Button A: X+69, Y+23
 Button B: X+27, Y+71
 Prize: X=18641, Y=10279
-]]
-
-test(part1(TEST_INPUT), 480)
-
-test(part2(TEST_INPUT), 0)
+]]), 480)
 -- LuaFormatter on
 
 main()
