@@ -19,7 +19,7 @@ local function parse_input(input)
     return robots
 end
 
-local function print_map(robots, w, h, seconds)
+local function print_map(robots, w, h)
     local map = {}
     for y = 1, h do
         map[y] = {}
@@ -39,8 +39,6 @@ local function print_map(robots, w, h, seconds)
         end
         print(line)
     end
-
-    print("Seconds: ", seconds)
 end
 
 local function get_next_pos(p, v, w, h, seconds)
@@ -89,7 +87,7 @@ local function part2(data, width, height)
             break
         end
     end
-    print_map(robots, width, height, seconds)
+    print_map(robots, width, height)
     return seconds
 end
 
