@@ -43,30 +43,9 @@ local function print_map(robots, w, h, seconds)
     print("Seconds: ", seconds)
 end
 
-local function get_next_pos(p, v, w, h)
-    local next_p = p + v
-    if next_p.x < 0 then
-        next_p.x = next_p.x + w
-    end
-    if next_p.x >= w then
-        next_p.x = next_p.x - w
-    end
-    if next_p.y < 0 then
-        next_p.y = next_p.y + h
-    end
-    if next_p.y >= h then
-        next_p.y = next_p.y - h
-    end
-    return next_p
-end
-
-local function dfs(p, v, t, w, h)
-    if t == TIME_BOUND then
-        return p
-    end
-
-    local next_p = get_next_pos(p, v, w, h)
-    return dfs(next_p, v, t + 1, w, h)
+local function get_next_pos(p, v, w, h, seconds)
+    local next_p = p + v:mult_const(seconds)
+    return Point2D.new(next_p.x % w, next_p.y % h)
 end
 
 local function part1(data, width, height)
@@ -76,7 +55,7 @@ local function part1(data, width, height)
     local quadrants = {0, 0, 0, 0}
 
     for _, robot in ipairs(robots) do
-        local pos = dfs(robot.p, robot.v, 0, width, height)
+        local pos = get_next_pos(robot.p, robot.v, width, height, TIME_BOUND)
         if pos.x > mid.x and pos.y < mid.y then
             quadrants[1] = quadrants[1] + 1
         elseif pos.x < mid.x and pos.y < mid.y then
@@ -98,7 +77,7 @@ local function part2(data, width, height)
         -- Assumption is that the Christmas Tree should be in some radius around the middle point.
         local around_mid = 0
         for _, robot in ipairs(robots) do
-            robot.p = get_next_pos(robot.p, robot.v, width, height)
+            robot.p = get_next_pos(robot.p, robot.v, width, height, 1)
             if math.abs(robot.p.x - mid.x) <= RADIUS and math.abs(robot.p.y - mid.y) <= RADIUS then
                 around_mid = around_mid + 1
             end

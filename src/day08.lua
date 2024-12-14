@@ -57,7 +57,7 @@ local function part2(data)
         local diff = this - other
         local i = 0
         while true do
-            local antinode = this + diff:const_mult(i)
+            local antinode = this + diff:mult_const(i)
             if antinode.x > 0 and antinode.x <= size and antinode.y > 0 and antinode.y <= size then
                 antinodes[antinode:key()] = true
             else

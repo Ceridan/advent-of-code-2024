@@ -24,7 +24,7 @@ function Point2D:__tostring()
     return string.format("Point2D(%.2f, %.2f)", self.x, self.y)
 end
 
-function Point2D:const_mult(val)
+function Point2D:mult_const(val)
     return Point2D.new(self.x * val, self.y * val)
 end
 
