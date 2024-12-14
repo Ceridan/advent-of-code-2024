@@ -104,6 +104,8 @@ local function part2(data, width, height)
             end
         end
         seconds = seconds + 1
+
+        -- Check if the most of the robots co-located around the middle point, most likely we found the Christmas Tree.
         if around_mid > #robots / 2 then
             break
         end
