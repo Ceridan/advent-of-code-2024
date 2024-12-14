@@ -95,5 +95,3 @@ test(part2(TEST_INPUT), 0)
 -- LuaFormatter on
 
 main()
-
--- 225605616 - too low
