@@ -96,15 +96,12 @@ local function move_vertical(map, robot, dir)
 end
 
 local function check_wall(map, x, y, dir)
-    if map[y][x] == "#" then
-        return true
-    elseif map[y][x] == "." then
-        return false
-    elseif map[y][x] == "[" then
+    if map[y][x] == "[" then
         return check_wall(map, x + dir.x, y + dir.y, dir) or check_wall(map, x + dir.x + 1, y + dir.y, dir)
-    else
+    elseif map[y][x] == "]" then
         return check_wall(map, x + dir.x, y + dir.y, dir) or check_wall(map, x + dir.x - 1, y + dir.y, dir)
     end
+    return map[y][x] == "#"
 end
 
 local function move_box(map, x, y, dir)
@@ -138,7 +135,7 @@ local function move_vertical_wide(map, robot, dir)
     return new_robot
 end
 
-local function move_robot(map, moves, robot, vertical_fn, box_symbol)
+local function move_robot(map, moves, robot, vertical_fn)
     for _, move in ipairs(moves) do
         if move == ">" or move == "<" then
             robot = move_horizontal(map, robot, DIRECTIONS[move])
@@ -150,7 +147,7 @@ local function move_robot(map, moves, robot, vertical_fn, box_symbol)
     local sum = 0
     for y = 1, #map do
         for x = 1, #map[y] do
-            if map[y][x] == box_symbol then
+            if map[y][x] == "O" or map[y][x] == "[" then
                 sum = sum + 100 * (y - 1) + (x - 1)
             end
         end
@@ -160,14 +157,14 @@ end
 
 local function part1(data)
     local map, moves, robot = parse_input(data)
-    return move_robot(map, moves, robot, move_vertical, "O")
+    return move_robot(map, moves, robot, move_vertical)
 end
 
 local function part2(data)
     local map, moves, robot = parse_input(data)
     map = expand_map(map)
     robot = Point2D.new(robot.x * 2 - 1, robot.y)
-    return move_robot(map, moves, robot, move_vertical_wide, "[")
+    return move_robot(map, moves, robot, move_vertical_wide)
 end
 
 local function main()
