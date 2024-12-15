@@ -1,13 +1,12 @@
 local io = require("lib.io")
 local test = require("lib.test")
 local Point2D = require("struct.point2d")
-local inspect = require("inspect")
 
 local DIRECTIONS = {
     ["^"] = Point2D.new(0, -1),
     [">"] = Point2D.new(1, 0),
     ["v"] = Point2D.new(0, 1),
-    ["<"] = Point2D.new(-1, 0),
+    ["<"] = Point2D.new(-1, 0)
 }
 
 local function parse_input(input)
@@ -27,7 +26,7 @@ local function parse_input(input)
             table.insert(map, arr)
         else
             local dirs = io.read_text_matrix(line)[1]
-            for  _, dir in ipairs(dirs) do
+            for _, dir in ipairs(dirs) do
                 table.insert(moves, dir)
             end
         end
@@ -38,9 +37,9 @@ end
 
 local function expand_map(map)
     local expanded = {}
-    for y=1, #map do
+    for y = 1, #map do
         table.insert(expanded, {})
-        for x=1, #map[y] do
+        for x = 1, #map[y] do
             if map[y][x] == "#" then
                 table.insert(expanded[y], "#")
                 table.insert(expanded[y], "#")
@@ -55,7 +54,6 @@ local function expand_map(map)
     end
     return expanded
 end
-
 
 local function move_horizontal(map, robot, dir)
     local new_robot = robot + dir
