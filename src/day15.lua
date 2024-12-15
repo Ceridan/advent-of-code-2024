@@ -10,6 +10,23 @@ local DIRECTIONS = {
     ["<"] = Point2D.new(-1, 0),
 }
 
+local function print_map(map, robot, move)
+    print("                       ")
+    print("Move", move)
+    for y = 1, #map do
+        local line = ""
+        for x = 1, #map[y] do
+            if robot.x == x and robot.y == y then
+                line = line .. "@"
+            else
+                line = line .. map[y][x]
+            end
+        end
+        print(line)
+    end
+    print("                       ")
+end
+
 local function parse_input(input)
     local lines = io.read_lines_as_array(input)
     local map = {}
@@ -34,6 +51,26 @@ local function parse_input(input)
     end
 
     return map, moves, robot
+end
+
+local function expand_map(map)
+    local expanded = {}
+    for y=1, #map do
+        table.insert(expanded, {})
+        for x=1, #map[y] do
+            if map[y][x] == "#" then
+                table.insert(expanded[y], "#")
+                table.insert(expanded[y], "#")
+            elseif map[y][x] == "O" then
+                table.insert(expanded[y], "[")
+                table.insert(expanded[y], "]")
+            else
+                table.insert(expanded[y], ".")
+                table.insert(expanded[y], ".")
+            end
+        end
+    end
+    return expanded
 end
 
 local function move_robot(map, robot, dir)
@@ -76,6 +113,109 @@ local function move_robot(map, robot, dir)
     return robot
 end
 
+local function move_right(map, robot)
+    local new_robot = robot + DIRECTIONS[">"]
+    local y = new_robot.y
+    for x = new_robot.x, #map[y] do
+        if map[y][x] == "#" then
+            return robot
+        elseif map[y][x] == "." then
+            for k = x, new_robot.x, -1 do
+                map[y][k] = map[y][k-1]
+            end
+            return new_robot
+        end
+    end
+    return robot
+end
+
+local function move_left(map, robot)
+    local new_robot = robot + DIRECTIONS["<"]
+    local y = new_robot.y
+    for x = new_robot.x, 1, -1 do
+        if map[y][x] == "#" then
+            return robot
+        elseif map[y][x] == "." then
+            for k = x, new_robot.x do
+                map[y][k] = map[y][k+1]
+            end
+            return new_robot
+        end
+    end
+    return robot
+end
+
+local function check_wall(map, x, y, dir)
+    if map[y][x] == "#" then
+        return true
+    elseif map[y][x] == "." then
+        return false
+    elseif map[y][x] == "[" then
+        return check_wall(map, x + dir.x, y + dir.y, dir) or check_wall(map, x + dir.x + 1, y + dir.y, dir)
+    else
+        return check_wall(map, x + dir.x, y + dir.y, dir) or check_wall(map, x + dir.x - 1, y + dir.y, dir)
+    end
+end
+
+-- local function move_box(map, x, y, dir)
+--     if map[y][x] == map[y + dir.y][x + dir.x] then
+--         move_box(map, x + dir.x, y + dir.y, dir)
+--     elseif map[y][x] == "[" and map[y + dir.y][x + dir.x] == "]" then
+--         if map[y + dir.y][x + dir.x + 1] == "[" then
+--             move_box(map, x + dir.x + 1, y + dir.y, dir)
+--         end
+--         move_box(map, x + dir.x, y + dir.y, dir)
+--     elseif map[y][x] == "]" and map[y + dir.y][x + dir.x] == "[" then
+--         if map[y + dir.y][x + dir.x - 1] == "]" then
+--             move_box(map, x + dir.x - 1, y + dir.y, dir)
+--         end
+--         move_box(map, x + dir.x, y + dir.y, dir)
+--     end
+
+--     if map[y][x] == "[" then
+--         map[y + dir.y][x + dir.x] = "["
+--         map[y + dir.y][x + dir.x + 1] = "]"
+--         map[y][x] = "."
+--         map[y][x + 1] = "."
+--     else
+--         map[y + dir.y][x + dir.x] = "]"
+--         map[y + dir.y][x + dir.x - 1] = "["
+--         map[y][x] = "."
+--         map[y][x - 1] = "."
+--     end
+-- end
+
+local function move_box(map, x, y, dir)
+    if map[y + dir.y][x + dir.x] == "[" then
+        move_box(map, x + dir.x, y + dir.y, dir)
+    elseif map[y + dir.y][x + dir.x] == "]" then
+        move_box(map, x + dir.x - 1, y + dir.y, dir)
+    end
+    if map[y + dir.y][x + dir.x + 1] == "[" then
+        move_box(map, x + dir.x + 1, y + dir.y, dir)
+    end
+
+    map[y + dir.y][x + dir.x] = "["
+    map[y + dir.y][x + dir.x + 1] = "]"
+    map[y][x] = "."
+    map[y][x + 1] = "."
+end
+
+local function move_vertical(map, robot, dir)
+    local new_robot = robot + dir
+    if check_wall(map, new_robot.x, new_robot.y, dir) then
+        return robot
+    end
+
+    if map[new_robot.y][new_robot.x] == "[" then
+        move_box(map, new_robot.x, new_robot.y, dir)
+    elseif map[new_robot.y][new_robot.x] == "]" then
+        move_box(map, new_robot.x - 1, new_robot.y, dir)
+    end
+
+    return new_robot
+end
+
 local function part1(data)
     local map, moves, robot = parse_input(data)
     for _, move in ipairs(moves) do
@@ -94,7 +234,35 @@ local function part1(data)
 end
 
 local function part2(data)
-    return 0
+    local map, moves, robot = parse_input(data)
+    map = expand_map(map)
+    robot = Point2D.new(robot.x * 2 - 1, robot.y)
+
+    print_map(map, robot, "start")
+    print(#moves)
+    for i, move in ipairs(moves) do
+        if move == ">" then
+            robot = move_right(map, robot)
+        elseif move == "<" then
+            robot = move_left(map, robot)
+        else
+            robot = move_vertical(map, robot, DIRECTIONS[move])
+        end
+        print(i)
+        if i > 278 and i < 350 then
+            print_map(map, robot, move)
+        end
+    end
+    print_map(map, robot, "finish")
+    local sum = 0
+    for y = 1, #map do
+        for x = 1, #map[y] do
+            if map[y][x] == "[" then
+                sum = sum + 100 * (y - 1) + (x - 1)
+            end
+        end
+    end
+    return sum
 end
 
 local function main()
@@ -141,6 +309,45 @@ vvv<<^>^v^^><<>>><>^<<><^vv^^<>vvv<>><^^v>^>vv<>v<<<<v<^v>^<^^>>>^<v<v
 ^^>vv<^v^v<vv>^<><v<^v>^^^>>>^^vvv^>vvv<>>>^<^>>>>>^<<^v>^vvv<>^<><<v>
 v^^>>><<^^<>>^v^<v^vv<>v^<<>^<^v^v><^<<<><<^<v><v<>vv>>v><v^<vv<>v^<<^
 ]]), 10092)
+
+
+test(part2([[
+#######
+#...#.#
+#.....#
+#..OO@#
+#..O..#
+#.....#
+#######
+
+<vv<<^^<<^^
+]]), 618)
+
+test(part2([[
+##########
+#..O..O.O#
+#......O.#
+#.OO..O.O#
+#..O@..O.#
+#O#..O...#
+#O..O..O.#
+#.OO.O.OO#
+#....O...#
+##########
+
+<vv>^<v^>v>^vv^v>v<>v^v<v<^vv<<<^><<><>>v<vvv<>^v^>^<<<><<v<<<v^vv^v>^
+vvv<<^>^v^^><<>>><>^<<><^vv^^<>vvv<>><^^v>^>vv<>v<<<<v<^v>^<^^>>>^<v<v
+><>vv>v^v^<>><>>>><^^>vv>v<^^^>>v^v^<^^>v^^>v^<^v>v<>>v^v^<v>v^^<^^vv<
+<<v<^>>^^^^>>>v^<>vvv^><v<<<>^^^vv^<vvv>^>v<^^^^v<>^>vvvv><>>v^<<^^^^^
+^><^><>>><>^^<<^^v>>><^<v>^<vv>>v>>>^v><>^v><<<<v>>v<v<v>vvv>^<><<>^><
+^>><>^v<><^vvv<^^<><v<<<<<><^v<<<><<<^^<v<^^^><^>>^<v^><<<^>>^v<v^v<v^
+>^>>^v>vv>^<<^v<>><<><<v<<v><>v<^vv<<<>^^v^>^^>>><<^v>>v^v><^^>>^<>vv^
+<><^^>^^^<><vvvvv^v<v<<>^v<v>v<<^><<><<><<<^^<<<^<<>><<><^^^>^^<>^>v<>
+^^>vv<^v^v<vv>^<><v<^v>^^^>>>^^vvv^>vvv<>>>^<^>>>>>^<<^v>^vvv<>^<><<v>
+v^^>>><<^^<>>^v^<v^vv<>v^<<>^<^v^v><^<<<><<^<v><v<>vv>>v><v^<vv<>v^<<^
+]]), 9021)
 -- LuaFormatter on
 
 main()
+
+--309 310
