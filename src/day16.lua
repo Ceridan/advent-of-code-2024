@@ -43,6 +43,9 @@ local function bfs(map, start)
             if scores[key] == nil or scores[key][item.dir] == nil or scores[key][item.dir] > item.score then
                 scores[key] = scores[key] or {}
                 scores[key][item.dir] = item.score
+                if scores[key].best == nil or scores[key].best > item.score then
+                    scores[key].best = item.score
+                end
 
                 if map[y][x] ~= "E" then
                     for dir, step in pairs(DIRECTIONS) do
@@ -59,12 +62,12 @@ local function bfs(map, start)
     return scores
 end
 
-local function dfs(map, scores, target_score, pos, dir, score, path, seats)
+local function dfs(map, scores, pos, dir, score, path, seats)
     if map[pos.y][pos.x] == "#" or score ~= scores[pos:key()][dir] then
         return
     end
     if map[pos.y][pos.x] == "E" then
-        if score == target_score then
+        if score == scores[pos:key()].best then
             for _, p in ipairs(path) do
                 seats[p] = true
             end
@@ -75,34 +78,22 @@ local function dfs(map, scores, target_score, pos, dir, score, path, seats)
     table.insert(path, pos:key())
     for next_dir, step in pairs(DIRECTIONS) do
         local new_score = score + STEP_SCORES[dir][next_dir]
-        dfs(map, scores, target_score, pos + step, next_dir, new_score, path, seats)
+        dfs(map, scores, pos + step, next_dir, new_score, path, seats)
     end
     table.remove(path)
 end
 
-local function get_scores(map, start, finish)
-    local scores = bfs(map, start)
-
-    local finish_scores = {}
-    for _, score in pairs(scores[finish:key()]) do
-        table.insert(finish_scores, score)
-    end
-    local best_score = math.min(unpack(finish_scores))
-
-    return best_score, scores
-end
-
 local function part1(data)
     local map, start, finish = parse_input(data)
-    local score = get_scores(map, start, finish)
-    return score
+    local scores = bfs(map, start)
+    return scores[finish:key()].best
 end
 
 local function part2(data)
     local map, start, finish = parse_input(data)
-    local target_score, scores = get_scores(map, start, finish)
+    local scores = bfs(map, start)
     local seats = {[start:key()] = true, [finish:key()] = true}
-    dfs(map, scores, target_score, start, "E", 0, {}, seats)
+    dfs(map, scores, start, "E", 0, {}, seats)
 
     local count = 0
     for _ in pairs(seats) do
