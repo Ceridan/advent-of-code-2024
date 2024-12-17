@@ -34,13 +34,15 @@ function VM.new(a, b, c)
     end
 
     local adv = function(cmb)
-        self._A = math.floor(self._A / bit32.lshift(2, self._get_combo_operand(cmb) - 1))
+        local op = self._get_combo_operand(cmb)
+        self._A = math.floor(self._A / bit32.lshift(2, op - 1))
     end
     local bxl = function(lit)
         self._B = bit32.bxor(self._B, lit)
     end
     local bst = function(cmb)
-        self._B = self._get_combo_operand(cmb) % 8
+        local op = self._get_combo_operand(cmb)
+        self._B = op % 8
     end
     local jnz = function(lit)
         if self._A == 0 then
@@ -52,13 +54,16 @@ function VM.new(a, b, c)
         self._B = bit32.bxor(self._B, self._C)
     end
     local out = function(cmb)
-        table.insert(self._output, self._get_combo_operand(cmb) % 8)
+        local op = self._get_combo_operand(cmb)
+        table.insert(self._output, op % 8)
     end
     local bdv = function(cmb)
-        self._B = math.floor(self._A / bit32.lshift(2, self._get_combo_operand(cmb) - 1))
+        local op = self._get_combo_operand(cmb)
+        self._B = math.floor(self._A / bit32.lshift(2, op - 1))
     end
     local cdv = function(cmb)
-        self._C = math.floor(self._A / bit32.lshift(2, self._get_combo_operand(cmb) - 1))
+        local op = self._get_combo_operand(cmb)
+        self._C = math.floor(self._A / bit32.lshift(2, op - 1))
     end
 
     self._opcodes = {adv, bxl, bst, jnz, bxc, out, bdv, cdv}
