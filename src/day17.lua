@@ -10,35 +10,16 @@ local inspect = require("inspect")
 local VM = {}
 VM.__index = VM
 
-function VM.new(a, b, c, program)
+function VM.new(a, b, c)
     local self = setmetatable({}, VM)
     self._A = a or 0
     self._B = b or 0
     self._C = c or 0
-    self._program = program or {}
     self._output = {}
     return self
 end
 
-function VM.parse(input)
-    local lines = io.read_lines_as_array(input)
-    local a = tonumber(lines[1]:gmatch("%d+")())
-    local b = tonumber(lines[2]:gmatch("%d+")())
-    local c = tonumber(lines[3]:gmatch("%d+")())
-
-    local program = {}
-    local ops = lines[4]:gmatch("%d+")
-    for op in ops do
-        table.insert(program, tonumber(op))
-    end
-    return VM.new(a, b, c, program)
-end
-
-function VM:set_a(a)
-    self._A = a or 0
-end
-
-function VM:run()
+function VM:run(program)
     local combo = function(val)
         if val <= 3 then
             return val
@@ -86,9 +67,9 @@ function VM:run()
     local opcodes = { adv, bxl, bst, jnz, bxc, out, bdv, cdv, }
 
     local p = 0
-    while p < #self._program do
-        local opcode = self._program[p + 1]
-        local operand = self._program[p + 2]
+    while p < #program do
+        local opcode = program[p + 1]
+        local operand = program[p + 2]
         local res = opcodes[opcode + 1](operand) or (-1)
         if res >= 0 then
             p = res
@@ -117,9 +98,24 @@ end
 
 ----------------------------------------
 
+local function parse_input(input)
+    local lines = io.read_lines_as_array(input)
+    local a = tonumber(lines[1]:gmatch("%d+")())
+    local b = tonumber(lines[2]:gmatch("%d+")())
+    local c = tonumber(lines[3]:gmatch("%d+")())
+
+    local program = {}
+    local ops = lines[4]:gmatch("%d+")
+    for op in ops do
+        table.insert(program, tonumber(op))
+    end
+    return a, b, c, program
+end
+
 local function part1(data)
-    local vm = VM.parse(data)
-    return vm:run()
+    local a, b, c, program = parse_input(data)
+    local vm = VM.new(a, b, c)
+    return vm:run(program)
 end
 
 local function part2(data)
