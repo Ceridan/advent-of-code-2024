@@ -79,6 +79,18 @@ local function part1(data, size, byte_count)
 end
 
 local function part2(data, size, byte_count)
+    local bytes = parse_input(data)
+    local ram = RAM.new(size)
+    for i = 1, byte_count do
+        ram:put(bytes[i])
+    end
+
+    for i = byte_count + 1, #bytes do
+        ram:put(bytes[i])
+        if bfs(ram) == -1 then
+            return bytes[i].x .. "," .. bytes[i].y
+        end
+    end
     return 0
 end
 
@@ -86,7 +98,7 @@ local function main()
     local input = io.read_file("src/inputs/day18.txt")
 
     print(string.format("Day 18, part 1: %s", part1(input, 71, 1024)))
-    print(string.format("Day 18, part 2: %s", part2(input)))
+    print(string.format("Day 18, part 2: %s", part2(input, 71, 1024)))
 end
 
 -- LuaFormatter off
