@@ -2,7 +2,6 @@ local io = require("lib.io")
 local test = require("lib.test")
 local Point2D = require("struct.point2d")
 local Queue = require("struct.queue")
-local inspect = require("inspect")
 
 local DIRECTIONS = {Point2D.new(0, -1), Point2D.new(1, 0), Point2D.new(0, 1), Point2D.new(-1, 0)}
 
@@ -65,40 +64,44 @@ local function bfs(ram)
             end
         end
     end
-    return -1
+    return 0
+end
+
+local function load_ram(size, bytes, byte_count)
+    local ram = RAM.new(size)
+    for i = 1, byte_count do
+        ram:put(bytes[i])
+    end
+    return ram
 end
 
 local function part1(data, size, byte_count)
     local bytes = parse_input(data)
-    local ram = RAM.new(size)
-    for i = 1, byte_count do
-        ram:put(bytes[i])
-    end
-
+    local ram = load_ram(size, bytes, byte_count)
     return bfs(ram)
 end
 
-local function part2(data, size, byte_count)
+local function part2(data, size)
     local bytes = parse_input(data)
-    local ram = RAM.new(size)
-    for i = 1, byte_count do
-        ram:put(bytes[i])
-    end
-
-    for i = byte_count + 1, #bytes do
-        ram:put(bytes[i])
-        if bfs(ram) == -1 then
-            return bytes[i].x .. "," .. bytes[i].y
+    local l, r = 1, #bytes
+    while l <= r do
+        local mid = math.floor((l + r) / 2)
+        local ram = load_ram(size, bytes, mid)
+        local res = bfs(ram)
+        if res > 0 then
+            l = mid + 1
+        else
+            r = mid - 1
         end
     end
-    return 0
+    return bytes[l].x .. "," .. bytes[l].y
 end
 
 local function main()
     local input = io.read_file("src/inputs/day18.txt")
 
     print(string.format("Day 18, part 1: %s", part1(input, 71, 1024)))
-    print(string.format("Day 18, part 2: %s", part2(input, 71, 1024)))
+    print(string.format("Day 18, part 2: %s", part2(input, 71)))
 end
 
 -- LuaFormatter off
@@ -131,8 +134,7 @@ local TEST_INPUT = [[
 ]]
 
 test(part1(TEST_INPUT, 7, 12), 22)
-
-test(part2(TEST_INPUT, 7, 12), "6,1")
+test(part2(TEST_INPUT, 7), "6,1")
 -- LuaFormatter on
 
 main()
