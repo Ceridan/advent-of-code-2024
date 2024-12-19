@@ -5,9 +5,9 @@ local Queue = require("struct.queue")
 
 local DIRECTIONS = {Point2D.new(0, -1), Point2D.new(1, 0), Point2D.new(0, 1), Point2D.new(-1, 0)}
 
-----------------------------------------
+-----------------------------------------
 ---                RAM                ---
-----------------------------------------
+-----------------------------------------
 
 local RAM = {}
 RAM.__index = RAM
@@ -33,7 +33,7 @@ function RAM:get(point)
     return self._map[y] and self._map[y][x]
 end
 
-----------------------------------------
+-----------------------------------------
 
 local function parse_input(input)
     local lines = io.read_lines_as_array(input)
