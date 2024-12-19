@@ -16,29 +16,31 @@ local function parse_input(input)
     return towels, patterns
 end
 
-local function dfs(towels, word, i, cache)
-    if i == string.len(word) + 1 then
+local function dfs(towels, word, cache)
+    if string.len(word) == 0 then
         return 1
     end
-    if cache[i] then
-        return cache[i]
+    if cache[word] then
+        return cache[word]
     end
 
     local res = 0
     for _, towel in ipairs(towels) do
-        if towel == word:sub(i, i + string.len(towel) - 1) then
-            res = res + dfs(towels, word, i + string.len(towel), cache)
+        local len = string.len(towel)
+        if towel == word:sub(1, len) then
+            res = res + dfs(towels, word:sub(len + 1), cache)
         end
     end
 
-    cache[i] = res
+    cache[word] = res
     return res
 end
 
 local function calculate_patterns(towels, patterns, reduce_fn)
     local possible = 0
+    local cache = {}
     for _, word in ipairs(patterns) do
-        local res = dfs(towels, word, 1, {})
+        local res = dfs(towels, word, cache)
         possible = reduce_fn(possible, res)
     end
     return possible
