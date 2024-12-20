@@ -8,6 +8,11 @@ function Point2D.new(x, y)
     return self
 end
 
+function Point2D.fromString(str)
+    local match = str:gmatch("%d+.%d+")
+    return Point2D.new(tonumber(match()), tonumber(match()))
+end
+
 function Point2D:__add(other)
     return Point2D.new(self.x + other.x, self.y + other.y)
 end
