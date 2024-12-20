@@ -37,6 +37,10 @@ function Point2D:distance(other)
     return math.sqrt((self.x - other.x) ^ 2 + (self.y - other.y) ^ 2)
 end
 
+function Point2D:manhattan(other)
+    return math.abs(self.x - other.x) + math.abs(self.y - other.y)
+end
+
 function Point2D:key()
     return self:__tostring()
 end
