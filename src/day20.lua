@@ -2,14 +2,8 @@ local io = require("lib.io")
 local test = require("lib.test")
 local Point2D = require("struct.point2d")
 local Queue = require("struct.queue")
-local inspect = require("inspect")
 
-local DIRECTIONS = {
-    Point2D.new(1, 0),
-    Point2D.new(0, 1),
-    Point2D.new(-1, 0),
-    Point2D.new(0, -1)
-}
+local DIRECTIONS = {Point2D.new(1, 0), Point2D.new(0, 1), Point2D.new(-1, 0), Point2D.new(0, -1)}
 
 local function parse_input(input)
     local map = io.read_text_matrix(input)
@@ -40,10 +34,7 @@ local function bfs(map, start)
 
                 if map[y][x] ~= "E" then
                     for _, dir in pairs(DIRECTIONS) do
-                        queue:enqueue({
-                            ["pos"] = item.pos + dir,
-                            ["time"] = item.time + 1,
-                        })
+                        queue:enqueue({["pos"] = item.pos + dir, ["time"] = item.time + 1})
                     end
                 end
             end
@@ -62,12 +53,12 @@ local function calculate_cheat_time_for_2(map, times, threshold)
     local acceptable_cheats = 0
     for y = 1, #map do
         for x = 1, #map[y] do
-            if map[y][x] == "#" and y > 1 and y < #map and map[y-1][x] ~= "#" and map[y+1][x] ~= "#" then
+            if map[y][x] == "#" and y > 1 and y < #map and map[y - 1][x] ~= "#" and map[y + 1][x] ~= "#" then
                 local p1, p2 = Point2D.new(x, y - 1), Point2D.new(x, y + 1)
                 if calculate_diff(times, p1, p2) >= threshold then
                     acceptable_cheats = acceptable_cheats + 1
                 end
-            elseif map[y][x] == "#" and x > 1 and x < #map[y] and map[y][x-1] ~= "#" and map[y][x+1] ~= "#" then
+            elseif map[y][x] == "#" and x > 1 and x < #map[y] and map[y][x - 1] ~= "#" and map[y][x + 1] ~= "#" then
                 local p1, p2 = Point2D.new(x - 1, y), Point2D.new(x + 1, y)
                 if calculate_diff(times, p1, p2) >= threshold then
                     acceptable_cheats = acceptable_cheats + 1
@@ -77,7 +68,6 @@ local function calculate_cheat_time_for_2(map, times, threshold)
     end
     return acceptable_cheats
 end
-
 
 local function calculate_cheat_times(times, radius, threshold)
     local acceptable_cheats = 0
