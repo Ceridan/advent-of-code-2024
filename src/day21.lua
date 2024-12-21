@@ -7,7 +7,7 @@ local DIRECTIONS = {
     [">"] = Point2D.new(1, 0),
     ["v"] = Point2D.new(0, 1),
     ["^"] = Point2D.new(0, -1),
-    ["<"] = Point2D.new(-1, 0),
+    ["<"] = Point2D.new(-1, 0)
 }
 
 -- +---+---+---+
@@ -32,7 +32,7 @@ local NUM_PAD = {
         ["7"] = Point2D.new(1, 1),
         ["8"] = Point2D.new(2, 1),
         ["9"] = Point2D.new(3, 1),
-        ["A"] = Point2D.new(3, 4),
+        ["A"] = Point2D.new(3, 4)
     },
     ["pos_to_btn"] = {
         [Point2D.new(2, 4):key()] = "0",
@@ -45,8 +45,8 @@ local NUM_PAD = {
         [Point2D.new(1, 1):key()] = "7",
         [Point2D.new(2, 1):key()] = "8",
         [Point2D.new(3, 1):key()] = "9",
-        [Point2D.new(3, 4):key()] = "A",
-    },
+        [Point2D.new(3, 4):key()] = "A"
+    }
 }
 
 --     +---+---+
@@ -61,15 +61,15 @@ local DIR_PAD = {
         [">"] = Point2D.new(3, 2),
         ["v"] = Point2D.new(2, 2),
         ["<"] = Point2D.new(1, 2),
-        ["A"] = Point2D.new(3, 1),
+        ["A"] = Point2D.new(3, 1)
     },
     ["pos_to_btn"] = {
         [Point2D.new(2, 1):key()] = "^",
         [Point2D.new(3, 2):key()] = ">",
         [Point2D.new(2, 2):key()] = "v",
         [Point2D.new(1, 2):key()] = "<",
-        [Point2D.new(3, 1):key()] = "A",
-    },
+        [Point2D.new(3, 1):key()] = "A"
+    }
 }
 
 local function list_shortest_paths(pad, from, to)
