@@ -107,7 +107,18 @@ local function build_path_map(pad)
     return path_map
 end
 
-local function dfs(seq, pads, dir_pads_map, cache)
+local function find_min_length(paths, len_fn)
+    local min_len = 0
+    for _, path in ipairs(paths) do
+        local path_len = len_fn(path)
+        if min_len == 0 or min_len > path_len then
+            min_len = path_len
+        end
+    end
+    return min_len
+end
+
+local function dfs(seq, pads, dir_map, cache)
     if cache[pads] and cache[pads][seq] then
         return cache[pads][seq]
     end
@@ -117,16 +128,12 @@ local function dfs(seq, pads, dir_pads_map, cache)
     for i = 1, string.len(seq) do
         local k2 = seq:sub(i, i)
         if pads == 0 then
-            len = len + dir_pads_map[k1][k2].len
+            len = len + dir_map[k1][k2].len
         else
-            local min_len = 0
-            for _, path in ipairs(dir_pads_map[k1][k2].paths) do
-                local path_len = dfs(path, pads - 1, dir_pads_map, cache)
-                if min_len == 0 or min_len > path_len then
-                    min_len = path_len
-                end
+            local len_fn = function(path)
+                return dfs(path, pads - 1, dir_map, cache)
             end
-            len = len + min_len
+            len = len + find_min_length(dir_map[k1][k2].paths, len_fn)
         end
         k1 = k2
     end
@@ -144,14 +151,10 @@ local function calculate_code_complexity(code, pads)
     local k1 = "A"
     for i = 1, string.len(code) do
         local k2 = code:sub(i, i)
-        local min_len = 0
-        for _, path in ipairs(num_map[k1][k2].paths) do
-            local path_len = dfs(path, pads - 1, dir_map, cache)
-            if min_len == 0 or min_len > path_len then
-                min_len = path_len
-            end
+        local len_fn = function(path)
+            return dfs(path, pads - 1, dir_map, cache)
         end
-        len = len + min_len
+        len = len + find_min_length(num_map[k1][k2].paths, len_fn)
         k1 = k2
     end
 
