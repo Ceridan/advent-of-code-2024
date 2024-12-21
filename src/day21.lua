@@ -254,6 +254,133 @@ local function dfs(pad, code, idx, curr, seq, sequences)
     end
 end
 
+local function select_sequence(sequences)
+    local best_dist = 0
+    local dist_to_seq = {}
+    for _, seq in ipairs(sequences) do
+        local dist = 0
+        for i = 1, #seq - 1 do
+            local p1 = DIR_PAD.btn_to_pos[seq:sub(i, i)]
+            local p2 = DIR_PAD.btn_to_pos[seq:sub(i+1, i+1)]
+            dist = dist + p1:manhattan(p2)
+        end
+        if best_dist == 0 or best_dist > dist then
+            best_dist = dist
+        end
+        dist_to_seq[dist] = (dist_to_seq[dist] or {})
+        table.insert(dist_to_seq[dist], seq)
+    end
+    return dist_to_seq[best_dist]
+end
+
+-- local function select_sequence(sequences)
+--     local best_dist = 0
+--     local min_left = 0
+--     local best_seq = nil
+--     for _, seq in ipairs(sequences) do
+--         local dist = 0
+--         local left = 0
+--         for i = 1, #seq - 1 do
+--             if seq:sub(i, i) == "<" then
+--                 left = left + 1
+--             end
+--             local p1 = DIR_PAD.btn_to_pos[seq:sub(i, i)]
+--             local p2 = DIR_PAD.btn_to_pos[seq:sub(i+1, i+1)]
+--             dist = dist + p1:manhattan(p2)
+--         end
+--         if seq:sub(-1, -1) == "<" then
+--             left = left + 1
+--         end
+--         if best_dist == 0 or best_dist > dist or (dist == best_dist and min_left > left) then
+--             best_dist = dist
+--             min_left = left
+--             best_seq = seq
+--         end
+--         print(seq, dist, left)
+--     end
+--     print("BEST: ", best_seq, best_dist, min_left)
+--     return best_seq
+-- end
+
+-- local function part1(data)
+--     local codes = io.read_lines_as_array(data)
+--     local complexity = 0
+--     for _, code in ipairs(codes) do
+--         local len = 0
+--         local seq1 = {}
+--         dfs(NUM_PAD, code, 1, "A", {}, seq1)
+--         for _, s1 in ipairs(seq1) do
+--             local seq2 = {}
+--             dfs(DIR_PAD, s1, 1, "A", {}, seq2)
+--             for _, s2 in ipairs(seq2) do
+--                 local seq3 = {}
+--                 dfs(DIR_PAD, s2, 1, "A", {}, seq3)
+--                 for _, s3 in ipairs(seq3) do
+--                     if len == 0 or string.len(s3) < len then
+--                         len = string.len(s3)
+--                     end
+--                 end
+--             end
+--         end
+--         print(code, len)
+--         complexity = complexity + len * tonumber(code:sub(1,-2))
+--     end
+--     return complexity
+-- end
+
+-- local function part1(data)
+--     local codes = io.read_lines_as_array(data)
+--     local complexity = 0
+--     for _, code in ipairs(codes) do
+--         local len = 0
+
+--         local seq1 = {}
+--         dfs(NUM_PAD, code, 1, "A", {}, seq1)
+--         local s1 = select_sequence(seq1)
+
+--         local seq2 = {}
+--         dfs(DIR_PAD, s1, 1, "A", {}, seq2)
+--         local s2 = select_sequence(seq2)
+
+--         local seq3 = {}
+--         dfs(DIR_PAD, s2, 1, "A", {}, seq3)
+--         for _, s3 in ipairs(seq3) do
+--             if len == 0 or string.len(s3) < len then
+--                 len = string.len(s3)
+--             end
+--         end
+--         print(code, len)
+--         complexity = complexity + len * tonumber(code:sub(1,-2))
+--     end
+--     return complexity
+-- end
+
+-- local function part1(data)
+--     local codes = io.read_lines_as_array(data)
+--     local complexity = 0
+--     for _, code in ipairs(codes) do
+--         local len = 0
+--         local seq1 = {}
+--         dfs(NUM_PAD, code, 1, "A", {}, seq1)
+--         for _, s1 in ipairs(seq1) do
+--             local seq2 = {}
+--             dfs(DIR_PAD, s1, 1, "A", {}, seq2)
+--             for _, s2 in ipairs(seq2) do
+--                 local seq3 = {}
+--                 dfs(DIR_PAD, s2, 1, "A", {}, seq3)
+--                 for _, s3 in ipairs(seq3) do
+--                     if len == 0 or string.len(s3) < len then
+--                         len = string.len(s3)
+--                     end
+--                 end
+--             end
+--         end
+--         print(code, len)
+--         complexity = complexity + len * tonumber(code:sub(1,-2))
+--     end
+--     return complexity
+-- end
+
 local function part1(data)
     local codes = io.read_lines_as_array(data)
     local complexity = 0
@@ -261,10 +388,10 @@ local function part1(data)
         local len = 0
         local seq1 = {}
         dfs(NUM_PAD, code, 1, "A", {}, seq1)
-        for _, s1 in ipairs(seq1) do
+        for _, s1 in ipairs(select_sequence(seq1)) do
             local seq2 = {}
             dfs(DIR_PAD, s1, 1, "A", {}, seq2)
-            for _, s2 in ipairs(seq2) do
+            for _, s2 in ipairs(select_sequence(seq2)) do
                 local seq3 = {}
                 dfs(DIR_PAD, s2, 1, "A", {}, seq3)
                 for _, s3 in ipairs(seq3) do
@@ -277,13 +404,6 @@ local function part1(data)
         print(code, len)
         complexity = complexity + len * tonumber(code:sub(1,-2))
     end
-
-    -- local code = "v<<A>>^A<A>AvA<^AA>A<vAAA>^A"
-    -- local code_arr = {}
-    -- code:gsub(".", function(ch) table.insert(code_arr, ch) end)
-    -- local sequences = {}
-    -- dfs(DIR_PAD, code_arr, 1, "A", {}, sequences)
-
     return complexity
 end
 
@@ -300,7 +420,9 @@ end
 
 -- LuaFormatter off
 print("test1")
-test(part1("029A"), 1972)
+-- test(part1("029A"), 1972)
+
+test(part1("379A"), 24256)
 
 print("test2")
 test(part1([[
@@ -314,3 +436,18 @@ test(part1([[
 
 print("main")
 main()
+
+
+-- test2
+-- 029A    68
+-- 980A    60
+-- 179A    68
+-- 456A    64
+-- 379A    64
+
+-- main
+-- 836A    70
+-- 540A    72
+-- 965A    66
+-- 480A    74
+-- 789A    66
