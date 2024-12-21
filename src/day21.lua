@@ -381,48 +381,80 @@ end
 --     return complexity
 -- end
 
-local function part1(data)
-    local codes = io.read_lines_as_array(data)
+local function process_code(code, dir_pads)
+    local seqs = {}
+    dfs(NUM_PAD, code, 1, "A", {}, seqs)
+    for i = 1, dir_pads do
+        local all_seqs = {}
+        for _, s in ipairs(select_sequence(seqs)) do
+            dfs(DIR_PAD, s, 1, "A", {}, all_seqs)
+        end
+        seqs = all_seqs
+    end
+
+    local len = 0
+    for _, s in ipairs(seqs) do
+        if len == 0 or string.len(s) < len then
+            len = string.len(s)
+        end
+    end
+    return len * tonumber(code:sub(1,-2))
+end
+
+local function calculate_complexity(codes, dir_pads)
     local complexity = 0
     for _, code in ipairs(codes) do
-        local len = 0
-        local seq1 = {}
-        dfs(NUM_PAD, code, 1, "A", {}, seq1)
-        for _, s1 in ipairs(select_sequence(seq1)) do
-            local seq2 = {}
-            dfs(DIR_PAD, s1, 1, "A", {}, seq2)
-            for _, s2 in ipairs(select_sequence(seq2)) do
-                local seq3 = {}
-                dfs(DIR_PAD, s2, 1, "A", {}, seq3)
-                for _, s3 in ipairs(seq3) do
-                    if len == 0 or string.len(s3) < len then
-                        len = string.len(s3)
-                    end
-                end
-            end
-        end
-        print(code, len)
-        complexity = complexity + len * tonumber(code:sub(1,-2))
+        local code_complexity = process_code(code, dir_pads)
+        print(code, code_complexity)
+        complexity = complexity + code_complexity
     end
     return complexity
 end
 
-local function part2(data)
+local function part1(data, dir_pads)
+    local codes = io.read_lines_as_array(data)
+    return calculate_complexity(codes, dir_pads)
+    -- local complexity = 0
+    -- for _, code in ipairs(codes) do
+    --     local len = 0
+    --     local seq1 = {}
+    --     dfs(NUM_PAD, code, 1, "A", {}, seq1)
+    --     for _, s1 in ipairs(select_sequence(seq1)) do
+    --         local seq2 = {}
+    --         dfs(DIR_PAD, s1, 1, "A", {}, seq2)
+    --         for _, s2 in ipairs(select_sequence(seq2)) do
+    --             local seq3 = {}
+    --             dfs(DIR_PAD, s2, 1, "A", {}, seq3)
+    --             for _, s3 in ipairs(seq3) do
+    --                 if len == 0 or string.len(s3) < len then
+    --                     len = string.len(s3)
+    --                 end
+    --             end
+    --         end
+    --     end
+    --     print(code, len)
+    --     complexity = complexity + len * tonumber(code:sub(1,-2))
+    -- end
+    -- return complexity
+end
+
+local function part2(data, dir_pads)
     return 0
 end
 
 local function main()
     local input = io.read_file("src/inputs/day21.txt")
 
-    print(string.format("Day 21, part 1: %s", part1(input)))
-    print(string.format("Day 21, part 2: %s", part2(input)))
+    print(string.format("Day 21, part 1: %s", part1(input, 2)))
+    print(string.format("Day 21, part 2: %s", part2(input, 25)))
 end
 
 -- LuaFormatter off
-print("test1")
--- test(part1("029A"), 1972)
+print("test1 - 029A")
+test(part1("029A", 2), 1972)
 
-test(part1("379A"), 24256)
+print("test1 - 379A")
+test(part1("379A", 2), 24256)
 
 print("test2")
 test(part1([[
@@ -431,7 +463,7 @@ test(part1([[
 179A
 456A
 379A
-]]), 126384)
+]], 2), 126384)
 -- LuaFormatter on
 
 print("main")
