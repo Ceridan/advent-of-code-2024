@@ -1,5 +1,6 @@
 local io = require("lib.io")
 local test = require("lib.test")
+local Set = require("struct.set")
 local inspect = require("inspect")
 
 local function parse_input(input)
@@ -8,17 +9,68 @@ local function parse_input(input)
     for _, line in ipairs(lines) do
         local left = line:sub(1, 2)
         local right = line:sub(-2, -1)
-        graph[left] = graph[left] or {}
+        graph[left] = graph[left] or Set.new()
         graph[left][right] = true
-        graph[right] = graph[right] or {}
+        graph[right] = graph[right] or Set.new()
         graph[right][left] = true
     end
     return graph
 end
 
+-- https://en.wikipedia.org/wiki/Bron%E2%80%93Kerbosch_algorithm
+-- local function find_max_clique(graph, R, P, X, cliques)
+--     if #P == 0 and #X == 0 then
+--         local clique = {}
+--         for v in pairs(R) do
+--             table.insert(clique, v)
+--         end
+--         if #clique > 1 then
+--             table.sort(clique)
+--             table.insert(cliques, clique)
+--         end
+--     end
+
+--     for v in pairs(P) do
+--         R[v] = true
+--         P1 = {}
+--         X1 = {}
+--         for comp in pairs(graph[v]) do
+--             if P[comp] then
+--                 P1[comp] = true
+--             end
+--             if X[comp] then
+--                 X1[comp] = true
+--             end
+--         end
+--         find_max_clique(graph, R, P1, X1, cliques)
+--         P[v] = false
+--         X[v] = true
+--     end
+-- end
+
+local function find_max_clique(graph, R, P, X, cliques)
+    if #P == 0 and #X == 0 then
+        local clique = {}
+        for v in pairs(R) do
+            table.insert(clique, v)
+        end
+        if #clique > 1 then
+            table.sort(clique)
+            table.insert(cliques, clique)
+        end
+    end
+
+    for v in pairs(P) do
+        local V = Set.new({v})
+        find_max_clique(graph, Set.union(R, V), Set.intersection(P, graph[v]), Set.intersection(X, graph[v]), cliques)
+        P = Set.difference(P, V)
+        X = Set.union(X, V)
+    end
+end
+
 local function part1(data)
     local network = parse_input(data)
-    local sets = {}
+    local triplets = Set.new()
     for comp1, conn1 in pairs(network) do
         if comp1:sub(1, 1) == "t" then
             for comp2 in pairs(conn1) do
@@ -26,22 +78,32 @@ local function part1(data)
                     if comp2 < comp3 and network[comp3][comp1] then
                         local set = {comp1, comp2, comp3}
                         table.sort(set)
-                        sets[table.concat(set)] = 1
+                        triplets[table.concat(set)] = true
                     end
                 end
             end
         end
     end
 
-    local sum = 0
-    for _, s in pairs(sets) do
-        sum = sum + s
-    end
-    return sum
+    return Set.size(triplets)
 end
 
 local function part2(data)
-    return 0
+    local network = parse_input(data)
+    local vertecies = Set.new()
+    for comp in pairs(network) do
+        vertecies[comp] = true
+    end
+    local cliques = {}
+    find_max_clique(network, Set.new(), vertecies, Set.new(), cliques)
+
+    local max_clique = {}
+    for _, clique in ipairs(cliques) do
+        if #clique > #max_clique then
+            max_clique = clique
+        end
+    end
+    return table.concat(max_clique, ",")
 end
 
 local function main()
@@ -89,7 +151,7 @@ td-yn
 
 test(part1(TEST_INPUT), 7)
 
-test(part2(TEST_INPUT), 0)
+test(part2(TEST_INPUT), "co,de,ka,ta")
 -- LuaFormatter on
 
 main()
