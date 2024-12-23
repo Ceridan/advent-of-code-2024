@@ -18,7 +18,7 @@ end
 
 -- https://en.wikipedia.org/wiki/Bron%E2%80%93Kerbosch_algorithm (with pivoting)
 local function find_max_cliques(graph, R, P, X, cliques)
-    if #P == 0 and #X == 0 then
+    if Set.size(P) == 0 and Set.size(X) == 0 then
         local clique = {}
         for v in pairs(R) do
             table.insert(clique, v)
