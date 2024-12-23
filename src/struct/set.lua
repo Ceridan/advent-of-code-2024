@@ -38,7 +38,7 @@ function Set.intersection(a, b)
         return {}
     end
 
-    local res = Set.new{}
+    local res = Set.new {}
     for k in pairs(a) do
         if a[k] and b[k] then
             res[k] = true

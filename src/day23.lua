@@ -1,7 +1,6 @@
 local io = require("lib.io")
 local test = require("lib.test")
 local Set = require("struct.set")
-local inspect = require("inspect")
 
 local function parse_input(input)
     local lines = io.read_lines_as_array(input)
@@ -17,38 +16,8 @@ local function parse_input(input)
     return graph
 end
 
--- https://en.wikipedia.org/wiki/Bron%E2%80%93Kerbosch_algorithm
--- local function find_max_clique(graph, R, P, X, cliques)
---     if #P == 0 and #X == 0 then
---         local clique = {}
---         for v in pairs(R) do
---             table.insert(clique, v)
---         end
---         if #clique > 1 then
---             table.sort(clique)
---             table.insert(cliques, clique)
---         end
---     end
-
---     for v in pairs(P) do
---         R[v] = true
---         P1 = {}
---         X1 = {}
---         for comp in pairs(graph[v]) do
---             if P[comp] then
---                 P1[comp] = true
---             end
---             if X[comp] then
---                 X1[comp] = true
---             end
---         end
---         find_max_clique(graph, R, P1, X1, cliques)
---         P[v] = false
---         X[v] = true
---     end
--- end
-
-local function find_max_clique(graph, R, P, X, cliques)
+-- https://en.wikipedia.org/wiki/Bron%E2%80%93Kerbosch_algorithm (with pivoting)
+local function find_max_cliques(graph, R, P, X, cliques)
     if #P == 0 and #X == 0 then
         local clique = {}
         for v in pairs(R) do
@@ -60,9 +29,19 @@ local function find_max_clique(graph, R, P, X, cliques)
         end
     end
 
-    for v in pairs(P) do
+    local PX = Set.union(P, X)
+    local u, neighbors = nil, 0
+    for v in pairs(PX) do
+        local size = Set.size(graph[v])
+        if neighbors < size then
+            u = v
+            neighbors = size
+        end
+    end
+
+    for v in pairs(Set.difference(P, graph[u])) do
         local V = Set.new({v})
-        find_max_clique(graph, Set.union(R, V), Set.intersection(P, graph[v]), Set.intersection(X, graph[v]), cliques)
+        find_max_cliques(graph, Set.union(R, V), Set.intersection(P, graph[v]), Set.intersection(X, graph[v]), cliques)
         P = Set.difference(P, V)
         X = Set.union(X, V)
     end
@@ -95,7 +74,7 @@ local function part2(data)
         vertecies[comp] = true
     end
     local cliques = {}
-    find_max_clique(network, Set.new(), vertecies, Set.new(), cliques)
+    find_max_cliques(network, Set.new(), vertecies, Set.new(), cliques)
 
     local max_clique = {}
     for _, clique in ipairs(cliques) do
