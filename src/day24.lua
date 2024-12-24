@@ -46,10 +46,10 @@ local function apply_gate(op, a, b)
     end
 end
 
-local function read_number(wires, ch)
+local function read_output(wires)
     local bits = {}
     for wire in pairs(wires) do
-        if wire:sub(1, 1) == ch then
+        if wire:sub(1, 1) == "z" then
             local bit_id = tonumber(wire:sub(2, -1))
             bits[bit_id + 1] = wires[wire].bit
         end
@@ -69,7 +69,18 @@ local function check_gate(wires, gates, gate_id)
     return wires[gate.args[1]].bit ~= nil and wires[gate.args[2]].bit ~= nil
 end
 
-local function process_scheme(wires, gates)
+local function get_max_output(gates)
+    local max_z = "z00"
+    for _, gate in ipairs(gates) do
+        if gate.res:sub(1, 1) == "z" and gate.res > max_z then
+            max_z = gate.res
+        end
+    end
+    return max_z
+end
+
+local function part1(data)
+    local wires, gates = parse_input(data)
     local queue = Queue.new()
     for id in ipairs(gates) do
         if check_gate(wires, gates, id) then
@@ -91,22 +102,7 @@ local function process_scheme(wires, gates)
             end
         end
     end
-end
-
-local function get_max_output(gates)
-    local max_z = "z00"
-    for _, gate in ipairs(gates) do
-        if gate.res:sub(1, 1) == "z" and gate.res > max_z then
-            max_z = gate.res
-        end
-    end
-    return max_z
-end
-
-local function part1(data)
-    local wires, gates = parse_input(data)
-    process_scheme(wires, gates)
-    return read_number(wires, "z")
+    return read_output(wires)
 end
 
 local function part2(data)
