@@ -2,7 +2,6 @@ local io = require("lib.io")
 local test = require("lib.test")
 local bit32 = require("bit32")
 local Queue = require("struct.queue")
-local inspect = require("inspect")
 
 local function parse_input(input)
     local lines = io.read_lines_as_array(input)
@@ -39,7 +38,7 @@ local function parse_input(input)
     return wires, gates
 end
 
-local function process_gate(op, a, b)
+local function apply_gate(op, a, b)
     if op == "AND" then
         return bit32.band(a, b)
     elseif op == "OR" then
@@ -51,22 +50,21 @@ local function process_gate(op, a, b)
     end
 end
 
-local function read_output(wires)
-    local zbits = {}
+local function read_number(wires, ch)
+    local bits = {}
     for wire in pairs(wires) do
-        if wire:sub(1, 1) == "z" then
+        if wire:sub(1, 1) == ch then
             local bit_id = tonumber(wire:sub(2, -1))
-            zbits[bit_id + 1] = wires[wire].bit
+            bits[bit_id + 1] = wires[wire].bit
         end
     end
 
     local output = 0
     local modifier = 1
-    for i, bit in ipairs(zbits) do
+    for i, bit in ipairs(bits) do
         output = output + bit * modifier
         modifier = modifier * 2
     end
-
     return output
 end
 
@@ -75,8 +73,7 @@ local function check_gate(wires, gates, gate_id)
     return wires[gate.args[1]].bit ~= nil and wires[gate.args[2]].bit ~= nil
 end
 
-local function part1(data)
-    local wires, gates = parse_input(data)
+local function process_scheme(wires, gates)
     local queue = Queue.new()
     for id in ipairs(gates) do
         if check_gate(wires, gates, id) then
@@ -88,7 +85,7 @@ local function part1(data)
         local id = queue:dequeue()
         local wire1, wire2 = gates[id].args[1], gates[id].args[2]
         local res_wire = gates[id].res
-        local res_bit = process_gate(gates[id].op, wires[wire1].bit, wires[wire2].bit)
+        local res_bit = apply_gate(gates[id].op, wires[wire1].bit, wires[wire2].bit)
         wires[res_wire] = wires[res_wire] or {["gates"] = {}}
         wires[res_wire]["bit"] = res_bit
 
@@ -98,19 +95,71 @@ local function part1(data)
             end
         end
     end
+end
 
-    return read_output(wires)
+local function get_max_output(gates)
+    local max_z = "z00"
+    for _, gate in ipairs(gates) do
+        if gate.res:sub(1, 1) == "z" and gate.res > max_z then
+            max_z = gate.res
+        end
+    end
+    return max_z
+end
+
+local function part1(data)
+    local wires, gates = parse_input(data)
+    process_scheme(wires, gates)
+    return read_number(wires, "z")
 end
 
 local function part2(data)
-    return 0
+    local wires, gates = parse_input(data)
+    local max_z = get_max_output(gates)
+
+    local swapped_set = {}
+
+    -- https://en.wikipedia.org/wiki/Adder_(electronics)
+    for _, gate in ipairs(gates) do
+        -- only XOR-gate can output to "z" except the highest bit
+        if gate.op ~= "XOR" and gate.res:sub(1,1) == "z" and gate.res ~= max_z then
+            swapped_set[gate.res] = true
+        -- AND-gate must output to OR-gate except the lowest bit (where carry-in is zero)
+        elseif gate.op == "AND" and gate.args[1] ~= "x00" and gate.args[2] ~= "x00" and wires[gate.res] then
+            for _, gate_id in ipairs(wires[gate.res].gates) do
+                if gates[gate_id].op ~= "OR" then
+                    swapped_set[gate.res] = true
+                end
+            end
+        -- XOR-gate must be connected to inputs (x, y) or outputs (z)
+        elseif gate.op == "XOR"
+            and (gate.args[1]:sub(1, 1) ~= "x" and gate.args[1]:sub(1, 1) ~= "y" and gate.args[1]:sub(1, 1) ~= "z")
+            and (gate.args[2]:sub(1, 1) ~= "x" and gate.args[2]:sub(1, 1) ~= "y" and gate.args[2]:sub(1, 1) ~= "z")
+            and (gate.res:sub(1, 1) ~= "x" and gate.res:sub(1, 1) ~= "y" and gate.res:sub(1, 1) ~= "z") then
+            swapped_set[gate.res] = true
+        -- XOR-gate cannot be connected to OR-gate
+        elseif gate.op == "XOR" and wires[gate.res] then
+            for _, gate_id in ipairs(wires[gate.res].gates) do
+                if gates[gate_id].op == "OR" then
+                    swapped_set[gate.res] = true
+                end
+            end
+        end
+    end
+
+    local swapped_list = {}
+    for w in pairs(swapped_set) do
+        table.insert(swapped_list, w)
+    end
+    table.sort(swapped_list)
+    return table.concat(swapped_list, ",")
 end
 
 local function main()
     local input = io.read_file("src/inputs/day24.txt")
 
-    print(string.format("Day 24, part 1: %15.0f", part1(input)))
-    print(string.format("Day 24, part 2: %15.0f", part2(input)))
+    print(string.format("Day 24, part 1: %12.0f", part1(input)))
+    print(string.format("Day 24, part 2: %s", part2(input)))
 end
 
 -- LuaFormatter off
@@ -179,3 +228,6 @@ tnw OR pbm -> gnj
 -- LuaFormatter on
 
 main()
+
+-- cph,gtb,jqn,kwb,qkf,z12,z16,z24
+-- cph,jqn,kwb,qkf,tgr,z12,z16,z24 - correct
