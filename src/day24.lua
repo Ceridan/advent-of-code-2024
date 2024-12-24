@@ -24,11 +24,7 @@ local function parse_input(input)
         else
             local match = line:gmatch("[^%s]+")
             local wire1, op, wire2, _, wire3 = match(), match(), match(), match(), match()
-            gates[gate_id] = {
-                ["op"] = op,
-                ["args"] = {wire1, wire2},
-                ["res"] = wire3,
-            }
+            gates[gate_id] = {["op"] = op, ["args"] = {wire1, wire2}, ["res"] = wire3}
             set_gate(wire1, gate_id)
             set_gate(wire2, gate_id)
             gate_id = gate_id + 1
@@ -61,7 +57,7 @@ local function read_number(wires, ch)
 
     local output = 0
     local modifier = 1
-    for i, bit in ipairs(bits) do
+    for _, bit in ipairs(bits) do
         output = output + bit * modifier
         modifier = modifier * 2
     end
@@ -122,22 +118,22 @@ local function part2(data)
     -- https://en.wikipedia.org/wiki/Adder_(electronics)
     for _, gate in ipairs(gates) do
         -- only XOR-gate can output to "z" except the highest bit
-        if gate.op ~= "XOR" and gate.res:sub(1,1) == "z" and gate.res ~= max_z then
+        if gate.op ~= "XOR" and gate.res:sub(1, 1) == "z" and gate.res ~= max_z then
             swapped_set[gate.res] = true
-        -- AND-gate must output to OR-gate except the lowest bit (where carry-in is zero)
+            -- AND-gate must output to OR-gate except the lowest bit (where carry-in is zero)
         elseif gate.op == "AND" and gate.args[1] ~= "x00" and gate.args[2] ~= "x00" and wires[gate.res] then
             for _, gate_id in ipairs(wires[gate.res].gates) do
                 if gates[gate_id].op ~= "OR" then
                     swapped_set[gate.res] = true
                 end
             end
-        -- XOR-gate must be connected to inputs (x, y) or outputs (z)
-        elseif gate.op == "XOR"
-            and (gate.args[1]:sub(1, 1) ~= "x" and gate.args[1]:sub(1, 1) ~= "y" and gate.args[1]:sub(1, 1) ~= "z")
-            and (gate.args[2]:sub(1, 1) ~= "x" and gate.args[2]:sub(1, 1) ~= "y" and gate.args[2]:sub(1, 1) ~= "z")
-            and (gate.res:sub(1, 1) ~= "x" and gate.res:sub(1, 1) ~= "y" and gate.res:sub(1, 1) ~= "z") then
+            -- XOR-gate must be connected to inputs (x, y) or outputs (z)
+        elseif gate.op == "XOR" and
+            (gate.args[1]:sub(1, 1) ~= "x" and gate.args[1]:sub(1, 1) ~= "y" and gate.args[1]:sub(1, 1) ~= "z") and
+            (gate.args[2]:sub(1, 1) ~= "x" and gate.args[2]:sub(1, 1) ~= "y" and gate.args[2]:sub(1, 1) ~= "z") and
+            (gate.res:sub(1, 1) ~= "x" and gate.res:sub(1, 1) ~= "y" and gate.res:sub(1, 1) ~= "z") then
             swapped_set[gate.res] = true
-        -- XOR-gate cannot be connected to OR-gate
+            -- XOR-gate cannot be connected to OR-gate
         elseif gate.op == "XOR" and wires[gate.res] then
             for _, gate_id in ipairs(wires[gate.res].gates) do
                 if gates[gate_id].op == "OR" then
